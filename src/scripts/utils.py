@@ -1,4 +1,6 @@
 import numpy as np
+import base64
+import streamlit as st
 
 def hour_to_month (hourly_array):
     monthly_array = []
@@ -13,4 +15,10 @@ def hour_to_month (hourly_array):
                 or i == 6552 or i == 7296 or i == 8016 or i == 8759:
             monthly_array.append(int(summert))
             summert = 0
-    return monthly_array  
+    return monthly_array 
+
+def render_svg(svg):
+    """Renders the given svg string."""
+    b64 = base64.b64encode(svg.encode('utf-8')).decode("utf-8")
+    html = r'<img src="data:image/svg+xml;base64,%s"/>' % b64
+    st.write(html, unsafe_allow_html=True)

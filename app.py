@@ -33,9 +33,6 @@ if adjust_obj.start == True:
     # grunnvarmeberegning
     geoenergy_obj = geoenergy.Geoenergy((demand_obj.dhw_arr + demand_obj.space_heating_arr), 
     temperature_obj.average_temperature, adjust_obj.cop, adjust_obj.thermal_conductivity, 
-    adjust_obj.groundwater_table)
-    st.subheader(f'- Brønnmeter : {int(geoenergy_obj.meter)} m')
-    st.subheader(f'- kWh/m : {geoenergy_obj.kWh_per_meter} m')
-    st.subheader(f'- Minimumstemperatur i borehull : {"{:.2f}".format(geoenergy_obj.min_temperature)} grader')
+    adjust_obj.groundwater_table, adjust_obj.energycoverage)
     
     
