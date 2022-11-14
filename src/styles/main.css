@@ -17,11 +17,18 @@ a:hover {
 
 ul {list-style-type: none;}
 
+/*
 ul.streamlit-expander {
     background-color: white;
     border: 0 !important;
 }
-    
+
+div.css-zxl87f.epcbefy1 {
+    color: #F6F8F1;
+    background-color: #1d3c34;
+}
+*/
+
 
 hr {
     margin-top: 0px;
@@ -44,10 +51,7 @@ div.stButton > button:active {
     transform: translateY(4px);
 }
 
-div.css-zxl87f.epcbefy1 {
-    color: #F6F8F1;
-    background-color: #1d3c34;
-}
+
 
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
