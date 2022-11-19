@@ -31,8 +31,20 @@ if adjust_obj.start == True:
     st.title('Resultater')
 
     # grunnvarmeberegning
-    geoenergy_obj = geoenergy.Geoenergy((demand_obj.dhw_arr + demand_obj.space_heating_arr), 
+    energy_arr = (demand_obj.dhw_arr + demand_obj.space_heating_arr)
+    geoenergy_obj = geoenergy.Geoenergy(energy_arr, 
     temperature_obj.average_temperature, adjust_obj.cop, adjust_obj.thermal_conductivity, 
     adjust_obj.groundwater_table, adjust_obj.energycoverage)
+
+
+    environment = environment.Environment(adjust_obj.energyoption, adjust_obj.energymix)
+    environment.calculate_emissions(energy_arr, 
+    geoenergy_obj.energy_gshp_compressor_arr, geoenergy_obj.energy_gshp_peak_arr)
+    st.write("**Strømsparing og utslippskutt med bergvarme**")
+    environment.text_after()
+    with st.expander("Mer om strømsparing og utslippskutt", expanded=False):
+        environment.text_before()
+        environment.plot()
+    st.text("")
     
     

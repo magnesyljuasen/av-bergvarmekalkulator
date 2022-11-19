@@ -37,14 +37,14 @@ class Adjust:
                     self.depth_to_bedrock_f()
                 with c2:
                     self.thermal_conductivity_f()
-                    self.borehole_resistance_f()              
+                    #self.borehole_resistance_f()              
             if st.form_submit_button('🖩 Start beregning'):
                 self.start = True
             else:
                 self.start = False
     
     def heatsystem_f(self):
-        option_list = ['Gulvvarme', 'Gulvvarme | Radiator', 'Radiator']
+        option_list = ['Gulvvarme', 'Radiator', 'Kun varmtvann']
         selected = st.selectbox('Velg type varmesystem', options=option_list)
         x = {option_list[0] : 4, option_list[1] : 3, option_list[2] : 2}
         self.cop = x[selected]
@@ -55,8 +55,9 @@ class Adjust:
     def energymix_f(self):
         option_list = ['Norsk', 'Norsk-europeisk', 'Europeisk']
         selected = st.selectbox('Velg type energimiks for strømproduksjon', options=option_list)
-        x = {option_list[0] : 16.2, option_list[1] : 116.9, option_list[2] : 123}
+        x = {option_list[0] : 16.2/1000, option_list[1] : 116.9/1000, option_list[2] : 123/1000}
         self.energymix = x[selected]
+        self.energyoption = selected
 
     def energycoverage_f(self):
         self.energycoverage = st.number_input('Velg energidekningsgrad [%]', min_value=80, value=95, max_value=100)
