@@ -40,10 +40,7 @@ class Adjust:
                     self.depth_to_bedrock_f()
                 with c2:
                     self.thermal_conductivity_f()
-<<<<<<< HEAD
                     #self.borehole_resistance_f()              
-=======
->>>>>>> 442d0c97d0ca66a142c20141597e32ce59e68f34
             if st.form_submit_button('🖩 Start beregning'):
                 self.start = True
             else:
