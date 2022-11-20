@@ -1,5 +1,5 @@
 import streamlit as st
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 from scipy.constants import pi
 import pygfunction as gt
@@ -268,19 +268,23 @@ class Geoenergy:
             st.info(f"Brønndybden bør fordeles på {number_of_wells} brønner á {int(meters/number_of_wells)} m med 15 meter avstand")
 
         with st.expander("Mer om brønndybde og varmepumpestørrelse"):
-            st.write('**Forutsetninger**')
-            self.diagram()
+            
             st.write(""" Vi har gjort en forenklet beregning for å dimensjonere et bergvarmeanlegg med 
             energibrønn og varmepumpe for din bolig. Dybde på energibrønn og størrelse på varmepumpe 
             beregnes ut ifra et anslått oppvarmingsbehov for boligen din og antakelser om 
             egenskapene til berggrunnen der du bor. Varmepumpestørrelsen gjelder on/off 
             og ikke varmepumper med inverterstyrt kompressor.""")
+
+            st.write('**Energi- og effekt**')
+            self.diagram()
+            st.write('**Simulert temperatur (borehullsveggen)**')
+            self.borehole_temperature()
+            st.caption(f""" kWh/meter {self.kWh_per_meter} og min temp {int(self.min_temperature)} grader""")
         
             st.write(""" Før du kan installere bergvarme, må entreprenøren gjøre en grundigere beregning. 
             Den må baseres på reelt oppvarmings- og kjølebehov, en mer nøyaktig vurdering av grunnforholdene, 
             inkludert berggrunnens termiske egenskaper, og simuleringer av temperaturen i energibrønnen. """)
 
-            st.write('**Simulert borehullstemperatur')
-            self.borehole_temperature()
-            st.write(f""" kWh/meter {self.kWh_per_meter} og min temp {self.min_temperature} grader""")
+            
+            
 

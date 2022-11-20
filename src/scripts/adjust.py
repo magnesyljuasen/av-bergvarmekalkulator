@@ -4,15 +4,18 @@ import requests
 import time 
 
 class Adjust:
-    def __init__(self, elprice, spaceheating, dhw, depth_to_bedrock, groundwater_table, thermal_conductivity):
+    def __init__(self, elprice, spaceheating, dhw, depth_to_bedrock, groundwater_table, thermal_conductivity, dhw_arr, space_heating_arr):
+        self.dhw_arr = dhw_arr
+        self.space_heating_arr = space_heating_arr
         self.elprice = elprice
-        self.spaceheating = spaceheating
-        self.dhw = dhw
+        self.space_heating_old = spaceheating
+        self.dhw_old = dhw
         self.energycoverage = 95
         self.depth_to_bedrock = depth_to_bedrock
         self.groundwater_table = groundwater_table
         self.thermal_conductivity = thermal_conductivity
-        self.borehole_resistance = 0.10
+        self.adjust_input()
+        self.adjust()
 
     def adjust_input(self):
         with st.form('input'):
@@ -37,7 +40,10 @@ class Adjust:
                     self.depth_to_bedrock_f()
                 with c2:
                     self.thermal_conductivity_f()
+<<<<<<< HEAD
                     #self.borehole_resistance_f()              
+=======
+>>>>>>> 442d0c97d0ca66a142c20141597e32ce59e68f34
             if st.form_submit_button('🖩 Start beregning'):
                 self.start = True
             else:
@@ -63,10 +69,10 @@ class Adjust:
         self.energycoverage = st.number_input('Velg energidekningsgrad [%]', min_value=80, value=95, max_value=100)
 
     def spaceheating_f(self):
-        self.spaceheating = st.number_input('Juster romoppvarmingsbehov [kWh]', min_value=0, value=self.spaceheating, max_value=100000, step=1000)
+        self.space_heating_sum = st.number_input('Juster romoppvarmingsbehov [kWh]', min_value=0, value=self.space_heating_old, max_value=100000, step=1000)
 
     def dhw_f(self):
-        self.dhw = st.number_input('Juster tappevannsbehov [kWh]', min_value=0, value=self.dhw, max_value=100000, step=1000)
+        self.dhw_sum = st.number_input('Juster tappevannsbehov [kWh]', min_value=0, value=self.dhw_old, max_value=100000, step=1000)
 
     def depth_to_bedrock_f(self):
         self.depth_to_bedrock = st.number_input('Dybde til fjell [m]', min_value=0, value=self.depth_to_bedrock, max_value=100, 
@@ -80,9 +86,19 @@ class Adjust:
 
     def thermal_conductivity_f(self):
         self.thermal_conductivity = st.number_input('Effektiv varmeledningsevne [W/m*K]', min_value=2.0, value=self.thermal_conductivity, max_value=10.0, step=0.1)
-    
-    def borehole_resistance_f(self):
-        self.borehole_resistance = st.number_input('Borehullsmotstand [m*K/W]', min_value=0.01, value=self.borehole_resistance, max_value=0.15)
+
+    def adjust(self):
+        dhw_sum = self.dhw_old
+        dhw_sum_new = self.dhw_sum
+
+        space_heating_sum = self.space_heating_old
+        space_heating_sum_new = self.space_heating_sum
+        dhw_percentage = dhw_sum_new / dhw_sum
+        space_heating_percentage = space_heating_sum_new / space_heating_sum
+
+        self.dhw_arr = (self.dhw_arr * dhw_percentage).flatten()
+        self.space_heating_arr = (self.space_heating_arr * space_heating_percentage).flatten()
+        self.energy_arr = (self.dhw_arr + self.space_heating_arr).flatten()
 
 
 

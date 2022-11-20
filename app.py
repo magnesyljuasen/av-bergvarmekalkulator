@@ -23,16 +23,19 @@ demand_obj.from_file(input_obj.area, temperature_obj.id)
 demand_obj.update()
 
 # justere forutsetninger
-adjust_obj = adjust.Adjust(1.5, demand_obj.space_heating_sum, demand_obj.dhw_sum, 10, 5, 3.0)
-adjust_obj.adjust_input()
+adjust_obj = adjust.Adjust(1.5, demand_obj.space_heating_sum, demand_obj.dhw_sum, 10, 5, 3.0, demand_obj.dhw_arr, demand_obj.space_heating_arr)
 
 # resultater
 if adjust_obj.start == True:
     st.title('Resultater')
 
     # grunnvarmeberegning
+<<<<<<< HEAD
     energy_arr = (demand_obj.dhw_arr + demand_obj.space_heating_arr)
     geoenergy_obj = geoenergy.Geoenergy(energy_arr, 
+=======
+    geoenergy_obj = geoenergy.Geoenergy((adjust_obj.dhw_arr + adjust_obj.space_heating_arr), 
+>>>>>>> 442d0c97d0ca66a142c20141597e32ce59e68f34
     temperature_obj.average_temperature, adjust_obj.cop, adjust_obj.thermal_conductivity, 
     adjust_obj.groundwater_table, adjust_obj.energycoverage)
 
