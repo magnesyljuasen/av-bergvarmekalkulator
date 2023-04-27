@@ -31,8 +31,10 @@ class Adjust:
                 c1, c2 = st.columns(2)
                 with c1:
                     self.elprice_f()
-                with c2:
                     self.energymix_f()
+                with c2:
+                    self.interest_f()
+                    self.payment_time_f()
             with st.expander("⛰️ Grunnforhold"):
                 c1, c2 = st.columns(2)
                 with c1:
@@ -83,6 +85,17 @@ class Adjust:
 
     def thermal_conductivity_f(self):
         self.thermal_conductivity = st.number_input('Effektiv varmeledningsevne [W/m*K]', min_value=2.0, value=self.thermal_conductivity, max_value=10.0, step=0.1)
+
+    def investment_f(self):
+        investment = self.investment
+        self.investment = st.number_input("Juster investeringskostnad [kr]", 
+        min_value = 10000, value = int(round(investment,-1)),max_value = 1000000, step = 5000)
+
+    def payment_time_f(self):
+        self.payment_time = st.number_input("Nedbetalingstid (lån) [år]", value = 20, min_value = 1, max_value = 20, step = 1)
+        
+    def interest_f(self):
+        self.interest = st.number_input("Juster effektiv rente [%]", value = 1.0, min_value = 0.0, max_value = 20.0, step = 0.1)
 
     def adjust(self):
         dhw_sum = self.dhw_old

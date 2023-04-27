@@ -5,8 +5,11 @@ from scipy.constants import pi
 import pygfunction as gt
 import pandas as pd
 import altair as alt
+from GHEtool import Borefield, FluidData, GroundData, PipeData
 
-from src.scripts.utils import render_svg
+
+from src.scripts.utils import render_svg, hour_to_month
+from src.scripts._pygfunction import Simulation
 
 class Geoenergy:
     def __init__(self, demand_arr, temperature, cop, thermal_conductivity, groundwater_table, coverage):
@@ -22,9 +25,49 @@ class Geoenergy:
         self.thermal_conductivity = thermal_conductivity
         self.groundwater_table = groundwater_table
         self.demand_calculation()
-        self.pygfunction_calculation([60, 70, 80, 90, 100, 110], 3, 2)
+        self.ghetool_calculation()
+        #Simulation().run_simulation(self.energy_gshp_delivered_arr)
+        #self.pygfunction_calculation([60, 70, 80, 90, 100, 110], 20, 0)
         self.wellnumber_calculation()
         self.show_results()
+
+    def ghetool_calculation(self):
+        meter = 80
+        minimum_temperature = -10
+        temperature_limit = 0
+        while minimum_temperature < temperature_limit:
+            data = GroundData(self.thermal_conductivity,             # conductivity of the soil (W/mK)
+                            self.temperature + 0.004*meter,            # Ground temperature at infinity (degrees C)
+                            0.10,           # equivalent borehole resistance (K/W)
+                            2.4 * 10**6)   # ground volumetric heat capacity (J/m3K)
+            # monthly loading values
+            peak_heating = np.array([160., 142, 102., 55., 0., 0., 0., 0., 40.4, 85., 119., 136.])  # Peak heating in kW
+            # annual heating and cooling load
+            # percentage of annual load per month (15.5% for January ...)
+            # resulting load per month
+            monthly_load_heating = hour_to_month(self.energy_gshp_delivered_arr)
+
+            # create the borefield object
+            borefield = Borefield(simulation_period=25,
+                                peak_heating=peak_heating,
+                                peak_cooling=np.zeros(12),
+                                baseload_heating=monthly_load_heating,
+                                baseload_cooling=np.zeros(12))
+
+            borefield.set_ground_parameters(data)
+            borefield.create_rectangular_borefield(1, 1, 6, 6, meter, 10, 0.075)
+
+            # set temperature boundaries
+            borefield.set_max_ground_temperature(16)   # maximum temperature
+            borefield.set_min_ground_temperature(0)    # minimum temperature
+            borefield.calculate_temperatures()
+            minimum_temperature = (min(borefield.results_month_heating))
+            meter = meter + 10
+        self.meter = meter
+        self.min_temperature = np.min(borefield.results_month_heating)
+        self.borehole_temperature_arr = borefield.results_month_heating
+        self.meter = meter + self.groundwater_table
+        self.kWh_per_meter = self.energy_gshp_delivered_sum/meter 
 
     def load(self, x, YEARS, arr):
         arr = arr * 1000
@@ -41,7 +84,7 @@ class Geoenergy:
             meter = demand/kWh_per_meter
 
             # Borehole dimensions
-            D = 1         # Borehole buried depth (m)
+            D = 10         # Borehole buried depth (m)
             H = meter     # Borehole length (m)
             r_b = 0.057   # Borehole radius (m)
 
@@ -55,12 +98,12 @@ class Geoenergy:
             pos_single = [(-D_s, 0.), (D_s, 0.)]
 
             # Ground properties
-            alpha = 1.0e-6      # Ground thermal diffusivity (m2/s)
+            alpha = 2.0e-6      # Ground thermal diffusivity (m2/s)
             k_s = self.thermal_conductivity # Ground thermal conductivity (W/m.K)
             T_g = self.temperature + 0.004*meter # Undisturbed ground temperature (degC)
 
             # Grout properties
-            k_g = 0.6           # Grout thermal conductivity (W/m.K)
+            k_g = 0.7           # Grout thermal conductivity (W/m.K)
 
             # Pipe properties
             k_p = 0.42           # Pipe thermal conductivity (W/m.K)
@@ -132,23 +175,27 @@ class Geoenergy:
                 # Evaluate outlet fluid temperature
                 T_f_out_single[i] = SingleUTube.get_outlet_temperature(T_f_in_single[i], T_b[i], m_flow, cp_f)
             
-            if np.min(T_b) < temperature_limit:
-                break 
+            if np.min(T_f_out_single) < temperature_limit:
+                self.min_temperature = np.min(T_f_out_single)
+                self.borehole_temperature_arr = T_f_out_single
+                self.meter = meter + self.groundwater_table
+                self.kWh_per_meter = kWh_per_meter 
+                return
 
-        self.min_temperature = np.min(T_b)
-        self.borehole_temperature_arr = T_b
+        self.min_temperature = np.min(T_f_out_single)
+        self.borehole_temperature_arr = T_f_out_single
         self.meter = meter + self.groundwater_table
         self.kWh_per_meter = kWh_per_meter 
     
     def borehole_temperature(self):
-        hours = np.arange(1, self.Nt+1) * self.dt / 3600.
+        months = np.arange(0, len(self.borehole_temperature_arr), 1)
         source = pd.DataFrame({
-        'Tid (timer)' : hours,
+        'Måneder' : months,
         'Temperatur (grader)' : self.borehole_temperature_arr
         })
 
         c = alt.Chart(source).mark_line(color = '#1d3c34').encode(
-            x=alt.X('Tid (timer):Q', scale=alt.Scale(domain=[0, len(hours)])),
+            x=alt.X('Måneder:Q', scale=alt.Scale(domain=[0, len(months)])),
             y='Temperatur (grader)')
 
         st.altair_chart(c, use_container_width=True)
