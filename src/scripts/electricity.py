@@ -31,17 +31,14 @@ class Electricity:
             polygon = shape(feature['geometry'])
             if polygon.contains(punkt):
                 region = feature['properties']['ElSpotOmr']
-                if region == 'NO 1':
-                    region = 'Sørøst-Norge (NO1)'
-                if region == 'NO 2':
-                    region = 'Sørvest-Norge (NO2)'
-                if region == 'NO 3':
-                    region = 'Midt-Norge (NO3)'
-                if region == 'NO 4':
-                    region = 'Nord-Norge (NO4)'
-                if region == 'NO 5':
-                    region = 'Vest-Norge (NO5)'
-        self.region = region
+                region_mapping = {
+                    'NO 1': 'Sørøst-Norge (NO1)',
+                    'NO 2': 'Sørvest-Norge (NO2)',
+                    'NO 3': 'Midt-Norge (NO3)',
+                    'NO 4': 'Nord-Norge (NO4)',
+                    'NO 5': 'Vest-Norge (NO5)'
+                }
+        self.region = region_mapping[region]
 
     def import_elspot_data(self):
         if self.year == '2018':

@@ -58,9 +58,9 @@ class Environment:
 
         st.write(f""" Vi har beregnet hvor mye strøm bergvarme vil spare i din bolig sammenlignet med å bruke elektrisk oppvarming.
         Figurene viser at du sparer {self.savings_power:,} kWh i året med bergvarme. 
-        Hvis vi tar utgangspunkt i en {self.selected_option}
+        Hvis vi tar utgangspunkt i en {self.selected_option.lower()} strømmiks
         vil du i løpet av 20 år spare {savings} tonn CO\u2082. 
-        Dette tilsvarer **{flights} flyreiser** mellom Oslo - Trondheim. """.replace(',', ' '))
+        Dette tilsvarer **{flights} flyreiser** mellom Oslo og Trondheim. """.replace(',', ' '))
 
     def text_after(self):
         savings_co2 = round(self.savings_co2_sum/1000)

@@ -25,7 +25,7 @@ class Temperature:
         self.average_temperature = average
         self.average_temperature_text = text
 
-    @st.cache
+    #@st.cache_data
     def import_csv (self):
         station_list = pd.read_csv('src/data/temperature/Stasjoner.csv', sep=',',on_bad_lines='skip')
         return station_list

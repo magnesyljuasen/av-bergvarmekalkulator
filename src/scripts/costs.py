@@ -2,8 +2,9 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import altair as alt
+import datetime
 
-from src.scripts.utils import render_svg, hour_to_month
+from src.scripts.utils import render_svg, hour_to_month, month_to_hour
 
 
 class Costs:
@@ -44,19 +45,179 @@ class Costs:
             self.interest = st.number_input("Juster effektiv rente [%]", value = 1.0, min_value = 0.0, max_value = 20.0, step = 0.1)
             submitted = st.form_submit_button("Oppdater")
 
+    def _is_weekend_or_holiday(self, day_number):
+        # Convert day number to a date object
+        year = datetime.datetime.now().year  # Get the current year
+        date = datetime.datetime(year, 1, 1) + datetime.timedelta(day_number - 1)
+
+        # Check if the date is a weekend (Saturday or Sunday)
+        if date.weekday() >= 5:
+            return "helg"
+
+        # Check if the date is a holiday in the Norwegian calendar
+        norwegian_holidays = [
+            (1, 1),   # New Year's Day
+            (5, 1),   # Labor Day
+            (5, 17),  # Constitution Day
+            (12, 25), # Christmas Day
+            (12, 26)  # Boxing Day
+        ]
+        
+        if (date.month, date.day) in norwegian_holidays:
+            return "helg"
+
+        # If neither weekend nor holiday, consider it a regular weekday
+        return "ukedag"
+
+           
+    def _nettleie(self, energy_arr):
+        max_value = 0
+        max_value_list = []
+        day = 0
+        kapasitetsledd_mapping = {
+            1 : 130,
+            2 : 190,
+            3 : 280,
+            4 : 375,
+            5 : 470,
+            6 : 565,
+            7 : 1250,
+            8 : 1720,
+            9 : 2190,
+            10 : 4180
+        }
+        energiledd_day = 35.20/100 #kr/kWh
+        energliedd_night = 28.95/100 #kr/kWh
+        state = "night"
+        energiledd_arr = []
+        for i, new_max_value in enumerate(energy_arr):
+            # finne state
+            if (i % 6) == 0:
+                state = "day"
+            if (i % 22) == 0:
+                state = "night"
+            # energiledd
+            if state == "night":
+                energiledd_arr.append(new_max_value * energliedd_night)
+            elif state == "helg":
+                energiledd_arr.append(new_max_value * energliedd_night)
+            elif state == "day":
+                energiledd_arr.append(new_max_value * energiledd_day)
+            # kapasitetsledd
+            if new_max_value > max_value:
+                max_value = new_max_value
+            if i % 24 == 0:
+                # energliedd
+                day_type = self._is_weekend_or_holiday(day)
+                if day_type == "helg":
+                    state = "night"
+                if day_type == "ukedag":
+                    state = "day"
+                # kapasitetsledd
+                max_value_list.append(max_value)
+                max_value = 0
+                day = day + 1
+                if day == 31:
+                    max_jan = float(round(np.mean(np.sort(max_value_list)[::-1][:3]),2))
+                    max_value_list = []
+                if day == 31 + 28:
+                    max_feb = float(round(np.mean(np.sort(max_value_list)[::-1][:3]),2))
+                    max_value_list = []
+                if day == 31 + 28 + 31:
+                    max_mar = float(round(np.mean(np.sort(max_value_list)[::-1][:3]),2))
+                    max_value_list = []
+                if day == 31 + 28 + 31 + 30:
+                    max_apr = float(round(np.mean(np.sort(max_value_list)[::-1][:3]),2))
+                    max_value_list = []
+                if day == 31 + 28 + 31 + 30 + 31:
+                    max_may = float(round(np.mean(np.sort(max_value_list)[::-1][:3]),2))
+                    max_value_list = []
+                if day == 31 + 28 + 31 + 30 + 31 + 30:
+                    max_jun = float(round(np.mean(np.sort(max_value_list)[::-1][:3]),2))
+                    max_value_list = []
+                if day == 31 + 28 + 31 + 30 + 31 + 30 + 31:
+                    max_jul = float(round(np.mean(np.sort(max_value_list)[::-1][:3]),2))
+                    max_value_list = []
+                if day == 31 + 28 + 31 + 30 + 31 + 30 + 31 + 31:
+                    max_aug = float(round(np.mean(np.sort(max_value_list)[::-1][:3]),2))
+                    max_value_list = []
+                if day == 31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30:
+                    max_sep = float(round(np.mean(np.sort(max_value_list)[::-1][:3]),2))
+                    max_value_list = []
+                if day == 31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31:
+                    max_oct = float(round(np.mean(np.sort(max_value_list)[::-1][:3]),2))
+                    max_value_list = []
+                if day == 31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30:
+                    max_nov = float(round(np.mean(np.sort(max_value_list)[::-1][:3]),2))
+                    max_value_list = []
+                if day == 31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30 + 31:
+                    max_dec = float(round(np.mean(np.sort(max_value_list)[::-1][:3]),2))
+                    max_value_list = []
+        max_array = [max_jan, max_feb, max_mar, max_apr, max_may, max_jun, max_jul, max_aug, max_sep, max_oct, max_nov, max_dec]
+        kapasitestledd_arr = []
+        for i, mnd_max in enumerate(max_array):
+            if mnd_max < 2:
+                kapasitestledd_arr.append(kapasitetsledd_mapping[1])
+            if mnd_max > 2 and mnd_max < 5:
+                kapasitestledd_arr.append(kapasitetsledd_mapping[2])
+            if mnd_max > 5 and mnd_max < 10:
+                kapasitestledd_arr.append(kapasitetsledd_mapping[3])
+            if mnd_max > 10 and mnd_max < 15:
+                kapasitestledd_arr.append(kapasitetsledd_mapping[4])
+            if mnd_max > 15 and mnd_max < 20:
+                kapasitestledd_arr.append(kapasitetsledd_mapping[5])
+            if mnd_max > 20 and mnd_max < 25:
+                kapasitestledd_arr.append(kapasitetsledd_mapping[6])
+            if mnd_max > 25 and mnd_max < 50:
+                kapasitestledd_arr.append(kapasitetsledd_mapping[7])
+            if mnd_max > 50 and mnd_max < 75:
+                kapasitestledd_arr.append(kapasitetsledd_mapping[8])
+            if mnd_max > 75 and mnd_max < 100:
+                kapasitestledd_arr.append(kapasitetsledd_mapping[9])
+            if mnd_max > 100:
+                kapasitestledd_arr.append(kapasitetsledd_mapping[10])
+        return kapasitestledd_arr, energiledd_arr
+
     def calculate_monthly_costs(self, energy_arr, compressor_arr, peak_arr, elprice_arr, investment):
+        self.elprice_arr = elprice_arr
+        self.elprice_df = pd.DataFrame({"Stømpris" : np.full(8760,self.elprice_arr).flatten()})
+        #-- detaljert på strømpris
+        if type(elprice_arr) != float:
+            fast_gebyr_arr = np.full(8760, 49/8760) # kr
+            spotpris_arr = elprice_arr # kr
+            pslag_arr = energy_arr * (1/100) # kr
+            forbruksavgift_arr = energy_arr * (15.41/100) # kr
+            enova_avgift_arr = energy_arr * (1/100) # kr
+            kapasitetsledd, energiledd_arr = self._nettleie(energy_arr) # kr
+            kapasitetsledd_arr = month_to_hour(kapasitetsledd) # kr
+            
+            el_df = pd.DataFrame({
+                'Gebyr spotpris': fast_gebyr_arr,
+                'Spotpris': spotpris_arr,
+                'Påslag': pslag_arr,
+                'Forbruksavgift': forbruksavgift_arr,
+                'Enova': enova_avgift_arr,
+                'Kapasitetsledd': kapasitetsledd_arr,
+                'Energiledd': energiledd_arr
+            })
+            self.elprice_df = el_df
+            self.elprice_arr = fast_gebyr_arr + spotpris_arr + pslag_arr + forbruksavgift_arr + enova_avgift_arr + kapasitetsledd_arr + energiledd_arr
         
         instalment = 0
         if investment != 0:
-            monthly_antall = self.payment_time * 12
-            monthly_rente = (self.interest/100) / 12
+            if self.interest < 0.50000000000000000:
+                monthly_antall = self.payment_time * 12
+                monthly_rente = 0
+            else:
+                monthly_antall = self.payment_time * 12
+                monthly_rente = (self.interest/100) / 12
             if monthly_rente > 0:
                 instalment = investment / ((1 - (1 / (1 + monthly_rente) ** monthly_antall)) / monthly_rente)
             else:
                 instalment = investment / monthly_antall
 
-        el_cost_hourly = energy_arr * elprice_arr
-        gshp_cost_hourly = (compressor_arr + peak_arr) * elprice_arr
+        el_cost_hourly = energy_arr * self.elprice_arr
+        gshp_cost_hourly = (compressor_arr + peak_arr) * self.elprice_arr
 
         self.el_cost_monthly = np.array(hour_to_month(el_cost_hourly))
         self.gshp_cost_monthly = np.array(hour_to_month(gshp_cost_hourly)) + instalment
@@ -67,6 +228,7 @@ class Costs:
 
 
     def plot(self, kostnad):
+        st.write("**Sammenligning**")
         gshp_text_1 = "Bergvarme"        
         gshp_text_2 = f"{kostnad}: " + str(int(round(self.gshp_cost_sum, -1))) + " kr/år"
         el_text_1 = "Elektrisk oppvarming"
@@ -101,6 +263,9 @@ class Costs:
             st.altair_chart(c1, use_container_width=True)  
         with col2:
             st.altair_chart(c2, use_container_width=True) 
+        
+        st.write("**Strømpris**")
+        st.bar_chart(self.elprice_df)
 
     def operation_show(self):
         st.write(""" Investeringskostnaden omfatter en komplett installasjon av et 
@@ -110,7 +275,7 @@ class Costs:
         st.write(""" Investeringskostnaden dekker ikke installasjon av vannbåren varme i boligen. 
         Søylediagrammene viser årlige driftskostnader med bergvarme 
         sammenlignet med elektrisk oppvarming. """)
-
+        
     def operation_show_after(self):
         investment = int(round(self.investment, -1))
         operation_saving = int(round(self.savings_sum, -1))

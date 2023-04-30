@@ -12,7 +12,8 @@ from src.scripts.utils import render_svg, hour_to_month
 from src.scripts._pygfunction import Simulation
 
 class Geoenergy:
-    def __init__(self, demand_arr, temperature, cop, thermal_conductivity, groundwater_table, coverage):
+    def __init__(self, demand_arr, temperature, cop, thermal_conductivity, groundwater_table, coverage, temperature_array):
+        self.temperature_array = temperature_array
         self.energy_arr = demand_arr.flatten()
         self.energy_sum = np.sum(self.energy_arr)
         self.coverage = coverage
@@ -26,48 +27,34 @@ class Geoenergy:
         self.groundwater_table = groundwater_table
         self.demand_calculation()
         self.ghetool_calculation()
-        #Simulation().run_simulation(self.energy_gshp_delivered_arr)
-        #self.pygfunction_calculation([60, 70, 80, 90, 100, 110], 20, 0)
         self.wellnumber_calculation()
         self.show_results()
 
     def ghetool_calculation(self):
-        meter = 80
-        minimum_temperature = -10
-        temperature_limit = 0
-        while minimum_temperature < temperature_limit:
-            data = GroundData(self.thermal_conductivity,             # conductivity of the soil (W/mK)
-                            self.temperature + 0.004*meter,            # Ground temperature at infinity (degrees C)
-                            0.10,           # equivalent borehole resistance (K/W)
-                            2.4 * 10**6)   # ground volumetric heat capacity (J/m3K)
-            # monthly loading values
-            peak_heating = np.array([160., 142, 102., 55., 0., 0., 0., 0., 40.4, 85., 119., 136.])  # Peak heating in kW
-            # annual heating and cooling load
-            # percentage of annual load per month (15.5% for January ...)
-            # resulting load per month
-            monthly_load_heating = hour_to_month(self.energy_gshp_delivered_arr)
+        meter_init = 80
+        data = GroundData(self.thermal_conductivity, self.temperature + 0.004*meter_init, 0.10, 2.4 * 10**6)
+        # monthly loading values
+        monthly_load_heating = hour_to_month(self.energy_gshp_delivered_arr)
 
-            # create the borefield object
-            borefield = Borefield(simulation_period=25,
-                                peak_heating=peak_heating,
-                                peak_cooling=np.zeros(12),
-                                baseload_heating=monthly_load_heating,
-                                baseload_cooling=np.zeros(12))
+        # create the borefield object
+        borefield = Borefield(simulation_period=25,
+                            peak_heating=np.zeros(12),
+                            peak_cooling=np.zeros(12),
+                            baseload_heating=monthly_load_heating,
+                            baseload_cooling=np.zeros(12))
 
-            borefield.set_ground_parameters(data)
-            borefield.create_rectangular_borefield(1, 1, 6, 6, meter, 10, 0.075)
-
-            # set temperature boundaries
-            borefield.set_max_ground_temperature(16)   # maximum temperature
-            borefield.set_min_ground_temperature(0)    # minimum temperature
-            borefield.calculate_temperatures()
-            minimum_temperature = (min(borefield.results_month_heating))
-            meter = meter + 10
-        self.meter = meter
-        self.min_temperature = np.min(borefield.results_month_heating)
-        self.borehole_temperature_arr = borefield.results_month_heating
-        self.meter = meter + self.groundwater_table
-        self.kWh_per_meter = self.energy_gshp_delivered_sum/meter 
+        borefield.set_ground_parameters(data)
+        borefield.create_rectangular_borefield(1, 1, 6, 6, meter_init, 10, 0.0575)
+        borefield.set_max_ground_temperature(16)   # maximum temperature
+        borefield.set_min_ground_temperature(0)    # minimum temperature
+        meter = borefield.size(meter_init)
+        if meter:
+            borefield.calculate_temperatures()  
+            self.meter = meter
+            #self.min_temperature = np.min(borefield.results_month_heating)
+            self.borehole_temperature_arr = borefield.results_month_heating
+            self.meter = meter + self.groundwater_table
+            self.kWh_per_meter = int(round(self.energy_gshp_delivered_sum/meter,-1)) 
 
     def load(self, x, YEARS, arr):
         arr = arr * 1000
@@ -77,115 +64,6 @@ class Geoenergy:
         stacked_arr = np.array(stacked_arr)
         arr = np.vstack([stacked_arr]).flatten()
         return arr
-
-    def pygfunction_calculation(self, kWh_per_meter_list, years, temperature_limit):
-        demand = np.sum(self.energy_gshp_delivered_arr)
-        for kWh_per_meter in kWh_per_meter_list:
-            meter = demand/kWh_per_meter
-
-            # Borehole dimensions
-            D = 10         # Borehole buried depth (m)
-            H = meter     # Borehole length (m)
-            r_b = 0.057   # Borehole radius (m)
-
-            # Pipe dimensions
-            rp_out = 0.0211     # Pipe outer radius (m)
-            rp_in = 0.0147      # Pipe inner radius (m)
-            D_s = 0.03         # Shank spacing (m)
-            epsilon = 1.0e-6    # Pipe roughness (m)
-
-            # Pipe positions
-            pos_single = [(-D_s, 0.), (D_s, 0.)]
-
-            # Ground properties
-            alpha = 2.0e-6      # Ground thermal diffusivity (m2/s)
-            k_s = self.thermal_conductivity # Ground thermal conductivity (W/m.K)
-            T_g = self.temperature + 0.004*meter # Undisturbed ground temperature (degC)
-
-            # Grout properties
-            k_g = 0.7           # Grout thermal conductivity (W/m.K)
-
-            # Pipe properties
-            k_p = 0.42           # Pipe thermal conductivity (W/m.K)
-
-            # Fluid properties
-            m_flow = 0.5       # Total fluid mass flow rate (kg/s)
-            fluid = gt.media.Fluid('MEA', 5)
-            cp_f = fluid.cp     # Fluid specific isobaric heat capacity (J/kg.K)
-            den_f = fluid.rho   # Fluid density (kg/m3)
-            visc_f = fluid.mu   # Fluid dynamic viscosity (kg/m.s)
-            k_f = fluid.k       # Fluid thermal conductivity (W/m.K)
-
-            # g-Function calculation options
-            options = {'nSegments': 8, 'disp': True}
-
-            # Simulation parameters      
-            dt = 3600                   # Time step (s)
-            tmax = years * 8760 * 3600  # Maximum time (s)
-            Nt = int(np.ceil(tmax/dt))  # Number of time steps
-            time = dt * np.arange(1, Nt+1)
-
-            self.Nt, self.dt = Nt, dt
-
-            # Evaluate heat extraction rate
-            Q = self.load(time/3600., years, self.energy_gshp_arr)
-
-            # Load aggregation scheme
-            LoadAgg = gt.load_aggregation.ClaessonJaved(dt, tmax)
-
-            # The field contains only one borehole
-            borehole = gt.boreholes.Borehole(H, D, r_b, x=0., y=0.)
-            boreField = [borehole]
-
-            # Get time values needed for g-function evaluation
-            time_req = LoadAgg.get_times_for_simulation()
-
-            # Calculate g-function
-            gFunc = gt.gfunction.gFunction(boreField, alpha, time=time_req, options=options)
-
-            # Initialize load aggregation scheme
-            LoadAgg.initialize(gFunc.gFunc/(2*pi*k_s))
-
-            # Pipe thermal resistance
-            R_p = gt.pipes.conduction_thermal_resistance_circular_pipe(rp_in, rp_out, k_p)
-            # Fluid to inner pipe wall thermal resistance (Single U-tube)
-            h_f = gt.pipes.convective_heat_transfer_coefficient_circular_pipe(m_flow, rp_in, visc_f, den_f, k_f, cp_f, epsilon)
-            R_f_ser = 1.0/(h_f*2*pi*rp_in)
-
-            # Single U-tube
-            SingleUTube = gt.pipes.SingleUTube(pos_single, rp_in, rp_out, borehole, k_s, k_g, R_f_ser + R_p)
-
-            T_b = np.zeros(Nt)
-            T_f_in_single = np.zeros(Nt)
-            T_f_out_single = np.zeros(Nt)
-            for i, (t, Q_b_i) in enumerate(zip(time, Q)):
-                # Increment time step by (1)
-                LoadAgg.next_time_step(t)
-
-                # Apply current load
-                LoadAgg.set_current_load(Q_b_i/H)
-
-                # Evaluate borehole wall temperature
-                deltaT_b = LoadAgg.temporal_superposition()
-                T_b[i] = T_g - deltaT_b
-
-                # Evaluate inlet fluid temperature
-                T_f_in_single[i] = SingleUTube.get_inlet_temperature(Q[i], T_b[i], m_flow, cp_f)
-
-                # Evaluate outlet fluid temperature
-                T_f_out_single[i] = SingleUTube.get_outlet_temperature(T_f_in_single[i], T_b[i], m_flow, cp_f)
-            
-            if np.min(T_f_out_single) < temperature_limit:
-                self.min_temperature = np.min(T_f_out_single)
-                self.borehole_temperature_arr = T_f_out_single
-                self.meter = meter + self.groundwater_table
-                self.kWh_per_meter = kWh_per_meter 
-                return
-
-        self.min_temperature = np.min(T_f_out_single)
-        self.borehole_temperature_arr = T_f_out_single
-        self.meter = meter + self.groundwater_table
-        self.kWh_per_meter = kWh_per_meter 
     
     def borehole_temperature(self):
         months = np.arange(0, len(self.borehole_temperature_arr), 1)
@@ -194,19 +72,31 @@ class Geoenergy:
         'Temperatur (grader)' : self.borehole_temperature_arr
         })
 
-        c = alt.Chart(source).mark_line(color = '#1d3c34').encode(
+        c = alt.Chart(source).mark_line(color = '#005173').encode(
             x=alt.X('Måneder:Q', scale=alt.Scale(domain=[0, len(months)])),
             y='Temperatur (grader)')
 
         st.altair_chart(c, use_container_width=True)
         
+    def air_temperature(self):
+        source = pd.DataFrame({
+        'Timer i ett år' : np.arange(0,8760,1),
+        'Utetemperatur (grader)' : self.temperature_array.flatten()
+        })
+
+        c = alt.Chart(source).mark_line(color = '#005173').encode(
+            x=alt.X('Timer i ett år:Q', scale=alt.Scale(domain=[0, 8760])),
+            y='Utetemperatur (grader)')
+
+        st.altair_chart(c, use_container_width=True)
+        
     def demand_calculation(self):
-        self.energy_gshp_arr, self.energy_gshp_sum, self.heat_pump_size = self.coverage_calculation()
-        self.heat_pump_size_adjustment()
+        self.energy_gshp_arr, self.energy_gshp_sum, self.cutoff = self.coverage_calculation()
+        self.heat_pump_size = max(self.energy_arr)
         self.energy_gshp_delivered_arr, self.energy_gshp_compressor_arr, self.energy_gshp_peak_arr, \
         self.energy_gshp_delivered_sum, self.energy_gshp_compressor_sum, self.energy_gshp_peak_sum = self.cop_calculation()
 
-    @st.cache
+    #@st.cache_data
     def coverage_calculation(self):
         coverage = self.coverage
         energy_arr = self.energy_arr
@@ -231,6 +121,7 @@ class Geoenergy:
 
     def cop_calculation(self):
         cop = self.cop
+        #turtemp = -0.3333*self.temperature_array + 40
         energy_arr = self.energy_arr
         energy_gshp_arr = self.energy_gshp_arr
         energy_gshp_delivered_arr = energy_gshp_arr - energy_gshp_arr / cop
@@ -243,39 +134,21 @@ class Geoenergy:
 
         return energy_gshp_delivered_arr, energy_gshp_compressor_arr, energy_gshp_peak_arr, energy_gshp_delivered_sum, energy_gshp_compressor_sum, energy_gshp_peak_sum
 
-    def heat_pump_size_adjustment(self):
-        heat_pump_size = self.heat_pump_size
-
-        #if heat_pump_size > 0 and heat_pump_size < 6:
-        #    heat_pump_size = 6
-        #if heat_pump_size > 6 and heat_pump_size < 8:
-        #    heat_pump_size = 8
-        #if heat_pump_size > 8 and heat_pump_size < 10:
-        #    heat_pump_size = 10
-        #if heat_pump_size > 10 and heat_pump_size < 12:
-        #    heat_pump_size = 12
-        #if heat_pump_size > 12 and heat_pump_size < 15:
-        #    heat_pump_size = 15
-        #if heat_pump_size > 14 and heat_pump_size > 17:
-        #    heat_pump_size = 17
-
-        self.heat_pump_size = heat_pump_size
-
     def diagram(self):
         wide_form = pd.DataFrame({
-            'Varighet (timer)' : np.array(range(0, len(self.energy_arr))),
-            'Spisslast (ikke bergvarme)' : np.sort(self.energy_arr)[::-1], 
-            'Levert energi fra brønn(er)' : np.sort(self.energy_gshp_arr)[::-1],
-            'Strømforbruk varmepumpe' : np.sort(self.energy_gshp_compressor_arr)[::-1]
+            'Timer i ett år' : np.array(range(0, len(self.energy_arr))),
+            'Spisslast' : self.energy_arr, 
+            'Fra brønn(er)' : self.energy_gshp_arr,
+            'Strøm varmepumpe' : self.energy_gshp_compressor_arr
             })
 
         c = alt.Chart(wide_form).transform_fold(
-            ['Spisslast (ikke bergvarme)', 'Levert energi fra brønn(er)', 'Strømforbruk varmepumpe'],
-            as_=['key', 'Effekt (kW)']).mark_area().encode(
-                x=alt.X('Varighet (timer):Q', scale=alt.Scale(domain=[0, 8760])),
-                y='Effekt (kW):Q',
-                color=alt.Color('key:N', scale=alt.Scale(domain=['Spisslast (ikke bergvarme)', 'Levert energi fra brønn(er)', 'Strømforbruk varmepumpe'], 
-                range=['#ffdb9a', '#48a23f', '#1d3c34']), legend=alt.Legend(orient='top', direction='vertical', title=None))
+            ['Spisslast', 'Fra brønn(er)', 'Strøm varmepumpe'],
+            as_=['key', 'Timesmidlet effekt (kWh/h)']).mark_area().encode(
+                x=alt.X('Timer i ett år:Q', scale=alt.Scale(domain=[0, 8760])),
+                y='Timesmidlet effekt (kWh/h):Q',
+                color=alt.Color('key:N', scale=alt.Scale(domain=['Spisslast', 'Fra brønn(er)', 'Strøm varmepumpe'], 
+                range=['#ffdb9a', '#48a23f', '#005173']), legend=alt.Legend(orient='top', direction='vertical', title=None))
             )
 
         st.altair_chart(c, use_container_width=True)
@@ -290,17 +163,18 @@ class Geoenergy:
                 return
 
     def show_results(self):
-        #st.subheader("Forenklet dimensjonering")
+        st.title("Resultater")
+        st.write("**Energibrønn og varmepumpe**")
         number_of_wells = self.number_of_wells
         meters = self.meter
         heat_pump_size = self.heat_pump_size
         text = " brønn"
         text1 = " energibrønn"
         text2 = "dybde"
-        
+    
         column_1, column_2 = st.columns(2)
         with column_1:
-            svg = """ <svg width="27" height="35" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" overflow="hidden"><defs><clipPath id="clip0"><rect x="505" y="120" width="27" height="26"/></clipPath></defs><g clip-path="url(#clip0)" transform="translate(-505 -120)"><path d="M18.6875 10.8333C20.9312 10.8333 22.75 12.6522 22.75 14.8958 22.75 17.1395 20.9312 18.9583 18.6875 18.9583L2.97917 18.9583C2.82959 18.9583 2.70833 19.0796 2.70833 19.2292 2.70833 19.3787 2.82959 19.5 2.97917 19.5L18.6875 19.5C21.2303 19.5 23.2917 17.4386 23.2917 14.8958 23.2917 12.353 21.2303 10.2917 18.6875 10.2917L3.63946 10.2917C3.63797 10.2916 3.63678 10.2904 3.63678 10.2889 3.6368 10.2882 3.63708 10.2875 3.63756 10.2871L7.23315 6.69148C7.33706 6.58388 7.33409 6.41244 7.22648 6.30852 7.12154 6.20715 6.95514 6.20715 6.85019 6.30852L2.78769 10.371C2.68196 10.4768 2.68196 10.6482 2.78769 10.754L6.85019 14.8165C6.95779 14.9204 7.12923 14.9174 7.23315 14.8098 7.33452 14.7049 7.33452 14.5385 7.23315 14.4335L3.63756 10.8379C3.63651 10.8369 3.63653 10.8351 3.63759 10.8341 3.6381 10.8336 3.63875 10.8333 3.63946 10.8333Z" stroke="#1D3C34" stroke-width="0.270833" fill="#1D3C34" transform="matrix(6.12323e-17 1 -1.03846 6.35874e-17 532 120)"/></g></svg>"""
+            svg = """ <svg width="27" height="35" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" overflow="hidden"><defs><clipPath id="clip0"><rect x="505" y="120" width="27" height="26"/></clipPath></defs><g clip-path="url(#clip0)" transform="translate(-505 -120)"><path d="M18.6875 10.8333C20.9312 10.8333 22.75 12.6522 22.75 14.8958 22.75 17.1395 20.9312 18.9583 18.6875 18.9583L2.97917 18.9583C2.82959 18.9583 2.70833 19.0796 2.70833 19.2292 2.70833 19.3787 2.82959 19.5 2.97917 19.5L18.6875 19.5C21.2303 19.5 23.2917 17.4386 23.2917 14.8958 23.2917 12.353 21.2303 10.2917 18.6875 10.2917L3.63946 10.2917C3.63797 10.2916 3.63678 10.2904 3.63678 10.2889 3.6368 10.2882 3.63708 10.2875 3.63756 10.2871L7.23315 6.69148C7.33706 6.58388 7.33409 6.41244 7.22648 6.30852 7.12154 6.20715 6.95514 6.20715 6.85019 6.30852L2.78769 10.371C2.68196 10.4768 2.68196 10.6482 2.78769 10.754L6.85019 14.8165C6.95779 14.9204 7.12923 14.9174 7.23315 14.8098 7.33452 14.7049 7.33452 14.5385 7.23315 14.4335L3.63756 10.8379C3.63651 10.8369 3.63653 10.8351 3.63759 10.8341 3.6381 10.8336 3.63875 10.8333 3.63946 10.8333Z" stroke="#005173" stroke-width="0.270833" fill="#005173" transform="matrix(6.12323e-17 1 -1.03846 6.35874e-17 532 120)"/></g></svg>"""
             render_svg(svg)
             st.metric(label="Brønndybde ", value=f"{int(meters)} m")
         with column_2:
@@ -312,25 +186,35 @@ class Geoenergy:
             text = " brønner" 
             text1 = " energibrønner"
             text2 = "total dybde"
-            st.info(f"Brønndybden bør fordeles på {number_of_wells} brønner á {int(meters/number_of_wells)} m med 15 meter avstand")
+            st.info(f"Brønndybden bør fordeles på {number_of_wells} brønner á {int(meters/number_of_wells)} m med minimum 15 meter avstand")
 
         with st.expander("Mer om brønndybde og varmepumpestørrelse"):
-            
+            st.write('**Innledende brønndimensjonering**')
             st.write(""" Vi har gjort en forenklet beregning for å dimensjonere et bergvarmeanlegg med 
             energibrønn og varmepumpe for din bolig. Dybde på energibrønn og størrelse på varmepumpe 
             beregnes ut ifra et anslått oppvarmingsbehov for boligen din og antakelser om 
             egenskapene til berggrunnen der du bor. Varmepumpestørrelsen gjelder on/off 
             og ikke varmepumper med inverterstyrt kompressor.""")
-
-            st.write('**Energi- og effekt**')
+            
             self.diagram()
-            st.write('**Simulert temperatur (borehullsveggen)**')
+            
+            st.write( f""" Hvis uttakket av varme fra energibrønnen ikke er balansert med varmetilførselen i grunnen, 
+                     vil temperaturen på bergvarmesystemet synke og energieffektiviteten minke. Det er derfor viktig at energibrønnen er tilstrekkelig dyp
+                     til å kunne balansere varmeuttaket. """)
+            
+            st.write(f"""De innledende beregningene viser at energibrønnen kan levere ca. **{self.kWh_per_meter} kWh/m** 
+                     for at tilstrekkelig temperatur i grunnen opprettholdes gjennom anleggets levetid.""")  
             self.borehole_temperature()
-            st.caption(f""" kWh/meter {self.kWh_per_meter} og min temp {int(self.min_temperature)} grader""")
+            
+            st.write('**Utetemperaturprofil**')
+            self.air_temperature()
         
-            st.write(""" Før du kan installere bergvarme, må entreprenøren gjøre en grundigere beregning. 
+            st.info(""" Før du kan installere bergvarme, må entreprenøren gjøre en grundigere beregning. 
             Den må baseres på reelt oppvarmings- og kjølebehov, en mer nøyaktig vurdering av grunnforholdene, 
             inkludert berggrunnens termiske egenskaper, og simuleringer av temperaturen i energibrønnen. """)
+            
+            
+            
 
             
             
