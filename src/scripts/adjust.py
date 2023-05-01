@@ -52,6 +52,8 @@ class Adjust:
         if float(selected_year) > 10:
             spotprice_arr = self._import_spotprice(selected_year)
             self.elprice = spotprice_arr
+        else:
+            self.elprice = float(selected_year)
     
     def _import_spotprice(self, selected_year):
         region_mapping = {

@@ -217,7 +217,7 @@ class Plotting:
         self.SPRING_BLUE = "#8fb7dc"
         self.SPRING_PINK = "#dc8fb7"
 
-        self.FOREST_GREEN = "#1d3c34"
+        self.FOREST_GREEN = "#005173"
         self.FOREST_BROWN = "#3c341d"
         self.FOREST_DARK_BROWN = "#3c251d"
         self.FOREST_PURPLE = "#341d3c"

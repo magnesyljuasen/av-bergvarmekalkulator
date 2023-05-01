@@ -74,10 +74,6 @@ div.stButton > button:first-child {
     will-change: transform;
   }
   
-  div.stButton > button:disabled {
-    pointer-events: none;
-  }
-  
   div.stButton > button:hover {
     color: white;
     background-color: #005173;

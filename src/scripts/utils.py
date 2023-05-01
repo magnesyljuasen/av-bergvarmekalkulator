@@ -56,8 +56,8 @@ def month_to_hour(monthly_array):
     return hourly_array
     
 
-def render_svg(svg):
+def render_svg(svg, text, result):
     """Renders the given svg string."""
     b64 = base64.b64encode(svg.encode('utf-8')).decode("utf-8")
-    html = r'<img src="data:image/svg+xml;base64,%s"/>' % b64
+    html = f'<small> {text} </small> <br> <img src="data:image/svg+xml;base64,%s"/> <font size="+5">  {result} </font>' % b64
     st.write(html, unsafe_allow_html=True)
