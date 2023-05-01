@@ -59,6 +59,8 @@ if start_calculation or st.session_state.load_state:
         ## justere forutsetninger
         #image = Image.open("src/data/figures/logo.png")
         #st.image(image)
+        st.header("Forutsetninger")
+        st.write("Her kan du justere forutsetningene som ligger til grunn for beregningene.")
         adjust_obj = adjust.Adjust(input_obj.ELPRICE, electricity_obj.region, demand_obj.space_heating_sum, demand_obj.dhw_sum, input_obj.GROUNDWATER_TABLE, input_obj.DEPTH_TO_BEDROCK, input_obj.THERMAL_CONDUCTIVITY, demand_obj.dhw_arr, demand_obj.space_heating_arr, input_obj.COP, input_obj.COVERAGE)
     # grunnvarmeberegning
     energy_arr = (adjust_obj.dhw_arr + adjust_obj.space_heating_arr)

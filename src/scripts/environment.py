@@ -31,7 +31,7 @@ class Environment:
         savings = self.savings_power
 
         #--1
-        source = pd.DataFrame({"label" : [f'Strømforbruk: {gshp} kWh per år', f'Grønn energi'], 
+        source = pd.DataFrame({"label" : [f'Strøm: {gshp:,} kWh/år'.replace(","," "), f'Fra grunnen: {(el-gshp):,} kWh/år'.replace(","," ")], 
         "value": [gshp, savings]})
         c1 = alt.Chart(source).mark_arc(innerRadius=35).encode(
             theta=alt.Theta(field="value", type="quantitative"),
@@ -39,7 +39,7 @@ class Environment:
             legend=alt.Legend(orient='top', direction='vertical', title=f'Bergvarme'))).configure_view(strokeWidth=0)
             
         #--2
-        source = pd.DataFrame({"label" : [f'Strømforbruk: {el} kWh per år'], 
+        source = pd.DataFrame({"label" : [f'Strøm: {el:,} kWh/år'.replace(","," ")], 
         "value": [el]})
         c2 = alt.Chart(source).mark_arc(innerRadius=35).encode(
             theta=alt.Theta(field="value", type="quantitative"),

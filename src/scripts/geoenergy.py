@@ -32,22 +32,25 @@ class Geoenergy:
 
     def ghetool_calculation(self):
         meter_init = 80
-        data = GroundData(self.thermal_conductivity, self.temperature + 0.004*meter_init, 0.10, 2.4 * 10**6)
-        # monthly loading values
-        monthly_load_heating = hour_to_month(self.energy_gshp_delivered_arr)
-
+        if self.temperature < 6:
+            undisturbed_temperature = 6
+        elif self.temperature > 8:
+            undisturbed_temperature = 8
+        else:
+            undisturbed_temperature = self.temperature
+        data = GroundData(self.thermal_conductivity, undisturbed_temperature, 0.10, 2.4 * 10**6)
+        borefield_gt = gt.boreholes.rectangle_field(1, 1, 6, 6, meter_init, 10, 0.0575)
+        
         # create the borefield object
-        borefield = Borefield(simulation_period=25,
-                            peak_heating=np.zeros(12),
-                            peak_cooling=np.zeros(12),
-                            baseload_heating=monthly_load_heating,
-                            baseload_cooling=np.zeros(12))
-
+        borefield = Borefield(simulation_period=20)
         borefield.set_ground_parameters(data)
-        borefield.create_rectangular_borefield(1, 1, 6, 6, meter_init, 10, 0.0575)
+        borefield.set_borefield(borefield_gt)        
+        borefield.set_hourly_heating_load(self.energy_gshp_delivered_arr)
+        #st.write(borefield._check_hourly_load())
+        
         borefield.set_max_ground_temperature(16)   # maximum temperature
         borefield.set_min_ground_temperature(0)    # minimum temperature
-        meter = borefield.size(meter_init)
+        meter = borefield.size(meter_init, L3_sizing=True)
         if meter:
             borefield.calculate_temperatures()  
             self.meter = meter
@@ -79,6 +82,7 @@ class Geoenergy:
         st.altair_chart(c, use_container_width=True)
         
     def air_temperature(self):
+        st.write(f"Gjennomsnittstemperatur {round(np.mean(self.temperature_array),2)} grader")
         source = pd.DataFrame({
         'Timer i ett år' : np.arange(0,8760,1),
         'Utetemperatur (grader)' : self.temperature_array.flatten()
