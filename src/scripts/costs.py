@@ -232,7 +232,6 @@ class Costs:
         self.gshp_cost_sum = np.sum(self.gshp_cost_monthly)
         self.savings_sum = self.el_cost_sum - self.gshp_cost_sum
 
-
     def plot(self, kostnad):
         st.write("**Sammenligning**")
         gshp_text_1 = "Bergvarme"        
@@ -269,10 +268,19 @@ class Costs:
             st.altair_chart(c1, use_container_width=True)  
         with col2:
             st.altair_chart(c2, use_container_width=True) 
-        
-        st.write("**Strømpris**")
-        st.write(f"Gjennomsnittlig strømpris inkl. alt (uten strømstøtte) {round(float(np.mean(self.elprice_arr)),2)} kr/kWh")
-        st.bar_chart(self.elprice_arr)
+    
+    def plot_elprice(self):
+        st.write("**Forutsatt strømpris**")
+        st.write(f"Gjennomsnittlig strømpris inkl. nettleie samt skatter og avgifter (uten strømstøtte): {round(float(np.mean(self.elprice_arr)),2)} kr/kWh") 
+        df = pd.DataFrame({
+            'Timer i ett år' : np.array(range(0, len(self.elprice_arr))),
+            'Strømpris (kr/kWh)' : self.elprice_arr})
+        c = alt.Chart(df).mark_area().encode(
+                x=alt.X('Timer i ett år', scale=alt.Scale(domain=[0,8760])),
+                y=alt.Y('Strømpris (kr/kWh)'),
+                color=alt.value('#005173')).configure_view(strokeWidth=0)
+                #legend = alt.Legend(title='Strømpris (kr/kWh)', orient='top', values=[3.22]))
+        st.altair_chart(c, use_container_width=True)
 
     def operation_show(self):
         st.write(""" Investeringskostnaden omfatter en komplett installasjon av et 

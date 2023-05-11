@@ -23,18 +23,24 @@ class Adjust:
 
     def adjust_input(self):
         with st.form('input'):
-            self.spaceheating_f()
-            self.dhw_f()
-            self.energycoverage_f()
-            self.heatsystem_f()
-            st.write("")
-            self.elprice_f()
-            self.energymix_f()
-            self.interest_f()
-            st.write("")
-            self.depth_to_bedrock_f()
-            self.groundwater_table_f()
-            self.thermal_conductivity_f()
+            with st.expander("Energi og effekt"):
+                self.spaceheating_f()
+                self.dhw_f()
+                self.energycoverage_f()
+                self.heatsystem_f()
+            with st.expander("Energibrønn og dimensjonering"):
+                self.depth_to_bedrock_f()
+                self.groundwater_table_f()
+                self.thermal_conductivity_f()
+                st.markdown("---")
+            with st.expander("Lønnsomhet og miljø"):    
+                self.interest_f()
+                self.elprice_f()
+                self.energymix_f()
+                st.markdown("---")
+                st.write(f"*- Gjennomsnittlig spotpris: {round(float(np.mean(self.elprice)),2)} kr/kWh*")
+                st.write(f"*- Utslippsfaktor: {(self.energymix)*1000} g CO₂e/kWh*")
+                
             #self.payment_time_f()
             
             #self.borehole_resistance_f()              
@@ -85,17 +91,17 @@ class Adjust:
         self.dhw_sum = st.number_input('Varmtvannsforbruk [kWh/år]', min_value=0, value=int(round(self.dhw_old,-3)), max_value=100000, step=1000)
 
     def depth_to_bedrock_f(self):
-        self.depth_to_bedrock = st.number_input('Dybde til fjell [m]', min_value=0, value=self.depth_to_bedrock, max_value=100, 
-        help=''' Dybde til fjell påvirker kostnaden for å 
-        bore energibrønn, og kan variere mye fra sted til sted. 
-        Brønnborer bør sjekke dette opp mot NGU sine databaser for 
-        grunnvannsbrønner og grunnundersøkelser.''')
+        self.depth_to_bedrock = st.number_input('Dybde til fjell [m]', min_value=0, value=self.depth_to_bedrock, max_value=100) 
+        #help=''' Dybde til fjell påvirker kostnaden for å 
+        #bore energibrønn, og kan variere mye fra sted til sted. 
+        #Brønnborer bør sjekke dette opp mot NGU sine databaser for 
+        #grunnvannsbrønner og grunnundersøkelser.''')
 
     def groundwater_table_f(self):
         self.groundwater_table = st.number_input('Dybde til grunnvannspeil [m]', min_value=0, value=self.groundwater_table, max_value=100)
 
     def thermal_conductivity_f(self):
-        self.thermal_conductivity = st.number_input('Berggrunnens effektive varmeledningsevne [W/m*K]', min_value=2.0, value=self.thermal_conductivity, max_value=10.0, step=0.1)
+        self.thermal_conductivity = st.number_input('Berggrunnens effektive varmeledningsevne [W/(m*K)]', min_value=2.0, value=self.thermal_conductivity, max_value=10.0, step=0.1)
 
     def investment_f(self):
         investment = self.investment

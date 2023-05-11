@@ -18,7 +18,7 @@ ul {list-style-type: none;}
 
 
 ul.streamlit-expander {
-    background-color: white;
+    background-color: transparent;
     border-radius: 25px;
     border: 0.05px solid #005173;
     padding: 5px;
@@ -37,6 +37,8 @@ hr {
     border: #1d3c34;
 }
 */
+
+
 
 div.input > button:first-child { 
     color: #005173;

@@ -52,6 +52,7 @@ with container:
 
 
 # resultater
+my_bar = st.progress(0)
 if start_calculation or st.session_state.load_state:
     st.session_state.load_state = True
     #placeholder_1.empty()
@@ -61,13 +62,17 @@ if start_calculation or st.session_state.load_state:
         #st.image(image)
         st.header("Forutsetninger")
         st.write("Her kan du justere forutsetningene som ligger til grunn for beregningene.")
+        my_bar.progress(33)
         adjust_obj = adjust.Adjust(input_obj.ELPRICE, electricity_obj.region, demand_obj.space_heating_sum, demand_obj.dhw_sum, input_obj.GROUNDWATER_TABLE, input_obj.DEPTH_TO_BEDROCK, input_obj.THERMAL_CONDUCTIVITY, demand_obj.dhw_arr, demand_obj.space_heating_arr, input_obj.COP, input_obj.COVERAGE)
     # grunnvarmeberegning
+    my_bar.progress(66)
     energy_arr = (adjust_obj.dhw_arr + adjust_obj.space_heating_arr)
     geoenergy_obj = geoenergy.Geoenergy(demand_arr=energy_arr, temperature=temperature_obj.average_temperature, cop=adjust_obj.cop, thermal_conductivity=adjust_obj.thermal_conductivity, groundwater_table=adjust_obj.groundwater_table, coverage=adjust_obj.energycoverage, temperature_array=temperature_obj.temperature_arr)
     environment = environment.Environment(option="Norsk-europeisk", co2_constant=adjust_obj.energymix)
     environment.calculate_emissions(energy_arr, 
     geoenergy_obj.energy_gshp_compressor_arr, geoenergy_obj.energy_gshp_peak_arr)
+    my_bar.progress(100)
+    geoenergy_obj.show_results()
     st.write("")
     st.write("**Strømsparing og utslippskutt med bergvarme**")
     environment.text_after()
@@ -88,6 +93,7 @@ if start_calculation or st.session_state.load_state:
         with st.expander("Mer om lønnsomhet med bergvarme"):
             costs.operation_show()
             costs.plot("Driftskostnad")
+            costs.plot_elprice()
         costs.profitibality_operation()
 
     with tab2:
@@ -96,6 +102,7 @@ if start_calculation or st.session_state.load_state:
         with st.expander("Mer om lønnsomhet med bergvarme"):
             costs.operation_and_investment_after()
             costs.plot("Totalkostnad")
+            costs.plot_elprice()
         costs.profitibality_operation_and_investment()
     
     st.text("")
@@ -124,5 +131,4 @@ if start_calculation or st.session_state.load_state:
     st.text("")
     st.button("Sjekk her hvem som kan installere bergvarme i din bolig", on_click=open_page, args=(f"https://www.varmepumpeinfo.no/forhandler?postnr={input_obj.postcode}&adresse={address_str[0]}+{address_str[1]}&type=bergvarme&meta={encodedStr}",))
 
-    
-    
+
