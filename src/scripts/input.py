@@ -42,8 +42,9 @@ class Input:
             self.long = float(selected_adr[2])
             self.postcode = selected_adr[3]
         else:
+            #st_lottie("src/csv/house.json")
             image = Image.open('src/data/figures/Ordinary day-amico.png')
-            st.image(image)
+            #st.image(image)
             st.stop()
 
     def area_input(self):

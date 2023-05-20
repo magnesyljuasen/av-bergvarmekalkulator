@@ -11,5 +11,5 @@ port = 8501
 enableCORS = true 
 
 [browser]
-serverAddress = "www.varmepumpeinfo.no"
+#serverAddress = "www.varmepumpeinfo.no"
 gatherUsageStats = false

@@ -10,7 +10,7 @@ st.set_page_config(
     page_title="Bergvarmekalkulatoren",
     page_icon="📟",
     layout="centered",
-    initial_sidebar_state="collapsed")
+    initial_sidebar_state="expanded")
 
 with open("src/styles/main.css") as f:
     st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
