@@ -7,9 +7,9 @@ font="Lato, sans serif"
 
 [server] 
 headless = true
-#port = 8501
+port = 8501
 enableCORS = true 
 
 [browser]
-#serverAddress = "www.varmepumpeinfo.no"
+serverAddress = "www.varmepumpeinfo.no"
 gatherUsageStats = false
