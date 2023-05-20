@@ -21,9 +21,9 @@ class Environment:
         self.gshp_co2_sum = np.sum(self.gshp_co2_monthly) * 20
         self.savings_co2_sum = (self.el_co2_sum - self.gshp_co2_sum)
 
-        self.gshp = int(round(np.sum(compressor_arr), -1))
-        self.el = int(round(np.sum(energy_arr) + np.sum(peak_arr), -1))
-        self.savings_power = int(round(self.el - self.gshp, -1))
+        self.gshp = int(round(np.sum(compressor_arr), -3))
+        self.el = int(round(np.sum(energy_arr) + np.sum(peak_arr), -3))
+        self.savings_power = int(round(self.el - self.gshp, -3))
     
     def plot(self):
         gshp = self.gshp
@@ -70,7 +70,7 @@ class Environment:
 
         c1, c2 = st.columns(2)
         with c1:
-            svg = """ <svg width="13" height="35" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" overflow="hidden"><defs><clipPath id="clip0"><rect x="614" y="84" width="13" height="26"/></clipPath></defs><g clip-path="url(#clip0)" transform="translate(-614 -84)"><path d="M614.386 99.81 624.228 84.3312C624.464 83.9607 625.036 84.2358 624.89 84.6456L621.224 95.1164C621.14 95.3522 621.32 95.5992 621.572 95.5992L626.3 95.5992C626.603 95.5992 626.777 95.9417 626.597 96.1831L616.458 109.691C616.194 110.039 615.644 109.725 615.823 109.326L619.725 100.456C619.838 100.203 619.63 99.9223 619.355 99.9447L614.74 100.36C614.437 100.388 614.229 100.057 614.392 99.7987Z" stroke="#005173" stroke-width="0.308789" stroke-linecap="round" stroke-miterlimit="10" fill="#F6F8F1"/></g></svg>"""
+            svg = """ <svg width="13" height="35" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" overflow="hidden"><defs><clipPath id="clip0"><rect x="614" y="84" width="13" height="26"/></clipPath></defs><g clip-path="url(#clip0)" transform="translate(-614 -84)"><path d="M614.386 99.81 624.228 84.3312C624.464 83.9607 625.036 84.2358 624.89 84.6456L621.224 95.1164C621.14 95.3522 621.32 95.5992 621.572 95.5992L626.3 95.5992C626.603 95.5992 626.777 95.9417 626.597 96.1831L616.458 109.691C616.194 110.039 615.644 109.725 615.823 109.326L619.725 100.456C619.838 100.203 619.63 99.9223 619.355 99.9447L614.74 100.36C614.437 100.388 614.229 100.057 614.392 99.7987Z" stroke="#005173" stroke-width="0.308789" stroke-linecap="round" stroke-miterlimit="10" fill="#FFF"/></g></svg>"""
             render_svg(svg, "Strømbesparelse med bergvarme", f"{self.savings_power:,} kWh/år".replace(',', ' '))
             #st.metric(label="Strømbesparelse med bergvarme", value= f"{self.savings_power:,} kWh/år".replace(',', ' '))
         with c2:

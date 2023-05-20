@@ -51,7 +51,7 @@ class Input:
         with c1:
             area = st.text_input('1. Tast inn oppvarmet boligareal [m²]')
         with c2:
-            st.info("Boligarealet som tilføres varme fra boligens varmesystem.")
+            st.info("Boligarealet som tilføres varme fra boligens varmesystem")
         minimum_area, maximum_area = 100, 500
         if area == 'None' or area == '':
             area = ''
@@ -63,17 +63,17 @@ class Input:
         self.area = area
     
     def heat_system_input(self):
-        option_list = ['Gulvvarme', 'Radiator', 'Kun varmtvann']
+        option_list = ['Gulvvarme', 'Gulvvarme + radiator', 'Radiator', 'Kun varmtvann']
         #st.write(f"Bergvarme krever at din bolig har et vannbårent varmesystem. Type varmesystem brukes til å estimere årsvarmefaktoren til varmepumpen.")
         c1, c2 = st.columns(2)
         with c1:
             selected = selectbox('1. Velg type varmesystem', options=option_list, no_selection_label="")
         with c2:
-            st.info('Bergvarme krever at boligen har et vannbårent varmesystem.')
+            st.info('Bergvarme krever at boligen har et vannbårent varmesystem')
         if not selected:
             st.stop()
         else:
-            x = {option_list[0] : 4, option_list[1] : 3, option_list[2] : 2}
+            x = {option_list[0] : 4, option_list[1] : 3.5, option_list[2] : 3, option_list[3]: 2.5}
             COP = x[selected]
             self.COP = COP
         
@@ -84,7 +84,7 @@ class Input:
         with c1:
             demand_sum_new = st.text_input('1. Hva er boligens årlige varmeforbruk? [kWh/år]', value = demand_sum_old)
         with c2:
-            st.info(f"Vi estimerer at din bolig forbruker ca. {demand_sum_old:,} kWh til varme i året".replace(",", " "))
+            st.info(f"Vi estimerer at din bolig forbruker cirka {demand_sum_old:,} kWh til varme i året".replace(",", " "))
         if demand_sum_new == 'None' or demand_sum_new == '':
             demand_sum_new = ''
             st.stop()

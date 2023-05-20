@@ -1,16 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;500;600;700;800&display=swap');
-
-
-* {font-family: 'Lato';}
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400&display=swap');
+			html, body, [class*="css"]  {
+			font-family: 'Lato', sans-serif;}
 
 a {
     text-decoration: none;
-    color: white !important;
-    font-weight: 500;
+    color: #383838 !important;
+    font-weight: 600;
 }
 
 a:hover {
-    color: #d33682 !important;
+    color: #005173 !important;
     text-decoration: none;
 }
 
@@ -37,8 +36,6 @@ hr {
     border: #1d3c34;
 }
 */
-
-
 
 div.input > button:first-child { 
     color: #005173;
@@ -87,7 +84,26 @@ div.stButton > button:first-child {
     box-shadow: none;
     transform: translateY(0);
   }
+  
+  div.stProgress > div > div > div > div {
+    background-color: #005173;
+    }
 
+/* */
+[data-testid="column"] {
+    box-shadow: rgb(0 0 0 / 20%) 0px 2px 1px -1px, rgb(0 0 0 / 14%) 0px 1px 1px 0px, rgb(0 0 0 / 12%) 0px 1px 3px 0px;
+    border-radius: 15px;
+    padding: 2.5% 2.5% 2.5% 2.5%;
+    text-align: center;
+} 
+
+
+/* Style containers */
+[data-testid="stVerticalBlock"] > [style*="flex-direction: column;"] > [data-testid="stVerticalBlock"] {
+    padding: 30px;
+    border-radius: 25px;
+    border: 1px groove #005173;
+}
 
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}

@@ -1,6 +1,15 @@
 [theme]
 primaryColor="#383838"
 backgroundColor="#fff"
-secondaryBackgroundColor="#efefef"
+secondaryBackgroundColor="#e5ecf2"
 textColor="#383838"
-font='sans serif'
+font="Lato, sans serif"
+
+[server] 
+headless = true
+port = 8501
+enableCORS = true 
+
+[browser]
+serverAddress = "www.varmepumpeinfo.no"
+gatherUsageStats = false

@@ -4,10 +4,13 @@ from PIL import Image
 import json
 import base64
 from src.scripts.utils import open_page
+import numpy as np
 
 st.set_page_config(
     page_title="Bergvarmekalkulatoren",
-    layout="centered")
+    page_icon="📟",
+    layout="centered",
+    initial_sidebar_state="collapsed")
 
 with open("src/styles/main.css") as f:
     st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
@@ -49,8 +52,6 @@ with container:
     if "load_state" not in st.session_state:
         st.session_state.load_state = False
 
-
-
 # resultater
 my_bar = st.progress(0)
 if start_calculation or st.session_state.load_state:
@@ -72,41 +73,41 @@ if start_calculation or st.session_state.load_state:
     environment.calculate_emissions(energy_arr, 
     geoenergy_obj.energy_gshp_compressor_arr, geoenergy_obj.energy_gshp_peak_arr)
     my_bar.progress(100)
-    geoenergy_obj.show_results()
+    st.header("Resultater for din bolig")
+    with st.container():
+        geoenergy_obj.show_results()
     st.write("")
-    st.write("**Strømsparing og utslippskutt med bergvarme**")
-    environment.text_after()
-    with st.expander("Mer om strømsparing og utslippskutt", expanded=False):
-        environment.text_before()
-        environment.plot()
-    st.text("")
+    with st.container():
+        st.write("**Strømsparing og utslippskutt med bergvarme**")
+        environment.text_after()
+        with st.expander("Mer om strømsparing og utslippskutt", expanded=False):
+            environment.text_before()
+            environment.plot()
     costs = costs.Costs(payment_time=20, interest=adjust_obj.interest)
     costs.calculate_investment(heat_pump_size=geoenergy_obj.heat_pump_size, meter = geoenergy_obj.meter, depth_to_bedrock = adjust_obj.depth_to_bedrock)
     
-    st.write("")
-    st.write("**Lønnsomhet**")
-    tab1, tab2 = st.tabs(["Direkte kjøp", "Lånefinansiert"])
+    with st.container():
+        st.write("**Lønnsomhet**")
+        tab1, tab2 = st.tabs(["Direkte kjøp", "Lånefinansiert"])
 
-    with tab1:
-        costs.calculate_monthly_costs(energy_arr = energy_arr, compressor_arr = geoenergy_obj.energy_gshp_compressor_arr, peak_arr = geoenergy_obj.energy_gshp_peak_arr, elprice_arr = adjust_obj.elprice, investment = 0)
-        costs.operation_show_after()
-        with st.expander("Mer om lønnsomhet med bergvarme"):
-            costs.operation_show()
-            costs.plot("Driftskostnad")
-            costs.plot_elprice()
-        costs.profitibality_operation()
+        with tab1:
+            costs.calculate_monthly_costs(energy_arr = energy_arr, compressor_arr = geoenergy_obj.energy_gshp_compressor_arr, peak_arr = geoenergy_obj.energy_gshp_peak_arr, elprice_arr = adjust_obj.elprice, investment = 0)
+            costs.operation_show_after()
+            with st.expander("Mer om lønnsomhet med bergvarme"):
+                costs.operation_show()
+                costs.plot("Driftskostnad")
+                costs.plot_elprice()
+            costs.profitibality_operation()
 
-    with tab2:
-        costs.calculate_monthly_costs(energy_arr = energy_arr, compressor_arr = geoenergy_obj.energy_gshp_compressor_arr, peak_arr = geoenergy_obj.energy_gshp_peak_arr, elprice_arr = adjust_obj.elprice, investment = costs.investment)
-        costs.operation_and_investment_show()
-        with st.expander("Mer om lønnsomhet med bergvarme"):
-            costs.operation_and_investment_after()
-            costs.plot("Totalkostnad")
-            costs.plot_elprice()
-        costs.profitibality_operation_and_investment()
-    
-    st.text("")
-    st.title("Sett i gang - finn en seriøs entreprenør")
+        with tab2:
+            costs.calculate_monthly_costs(energy_arr = energy_arr, compressor_arr = geoenergy_obj.energy_gshp_compressor_arr, peak_arr = geoenergy_obj.energy_gshp_peak_arr, elprice_arr = adjust_obj.elprice, investment = costs.investment)
+            costs.operation_and_investment_show()
+            with st.expander("Mer om lønnsomhet med bergvarme"):
+                costs.operation_and_investment_after()
+                costs.plot("Totalkostnad")
+                costs.plot_elprice()
+            costs.profitibality_operation_and_investment()   
+    st.header("Sett i gang - finn en seriøs entreprenør")
     st.write(""" Sjekk hvilke entreprenører som kan montere varmepumpe 
     og bore energibrønn hos deg - riktig og trygt! Bruk en 
     entreprenør godkjent av Varmepumpeforeningen. """)
@@ -129,6 +130,7 @@ if start_calculation or st.session_state.load_state:
     st.write("- • Skrive kontrakt før arbeidet starter")
 
     st.text("")
-    st.button("Sjekk her hvem som kan installere bergvarme i din bolig", on_click=open_page, args=(f"https://www.varmepumpeinfo.no/forhandler?postnr={input_obj.postcode}&adresse={address_str[0]}+{address_str[1]}&type=bergvarme&meta={encodedStr}",))
+    #st.button("Sjekk her hvem som kan installere bergvarme i din bolig", on_click=open_page, args=(f"https://www.varmepumpeinfo.no/forhandler?postnr={input_obj.postcode}&adresse={address_str[0]}+{address_str[1]}&type=bergvarme&meta={encodedStr}",))
+    st.markdown(f'<a target="parent" style="background-color: #white;color:black;font-size:1.25rem;border: solid 1px #e5e7eb; border-radius: 15px; text-align: center;padding: 16px 24px;min-height: 60px;display: inline-block;box-sizing: border-box;width: 100%;" href="https://www.varmepumpeinfo.no/forhandler?postnr={input_obj.postcode}&adresse={address_str[0]}+{address_str[1]}&type=bergvarme&meta={encodedStr}">Sjekk her hvem som kan installere bergvarme i din bolig</a>', unsafe_allow_html=True)
 
 

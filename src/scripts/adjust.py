@@ -112,7 +112,7 @@ class Adjust:
         self.payment_time = st.number_input("Nedbetalingstid (lån) [år]", value = 20, min_value = 1, max_value = 20, step = 1)
         
     def interest_f(self):
-        self.interest = st.number_input("Effektiv rente (lånefinansiert) [%]", value = 1.0, min_value = 0.0, max_value = 20.0, step = 0.1)
+        self.interest = st.number_input("Effektiv rente (lånefinansiert) [%]", value = 4.5, min_value = 0.0, max_value = 20.0, step = 0.1)
 
     def adjust(self):
         dhw_sum = self.dhw_old
