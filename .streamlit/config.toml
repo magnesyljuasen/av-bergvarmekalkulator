@@ -7,7 +7,7 @@ font="Lato, sans serif"
 
 [server] 
 headless = true
-port = 8501
+#port = 8501
 enableCORS = true 
 
 [browser]

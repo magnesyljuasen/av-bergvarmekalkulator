@@ -85,7 +85,7 @@ if start_calculation or st.session_state.load_state:
             environment.plot()
     costs = costs.Costs(payment_time=20, interest=adjust_obj.interest)
     costs.calculate_investment(heat_pump_size=geoenergy_obj.heat_pump_size, meter = geoenergy_obj.meter, depth_to_bedrock = adjust_obj.depth_to_bedrock)
-    
+    st.write("")
     with st.container():
         st.write("**Lønnsomhet**")
         tab1, tab2 = st.tabs(["Direkte kjøp", "Lånefinansiert"])
@@ -106,11 +106,13 @@ if start_calculation or st.session_state.load_state:
                 costs.operation_and_investment_after()
                 costs.plot("Totalkostnad")
                 costs.plot_elprice()
-            costs.profitibality_operation_and_investment()   
-    st.header("Sett i gang - finn en seriøs entreprenør")
-    st.write(""" Sjekk hvilke entreprenører som kan montere varmepumpe 
-    og bore energibrønn hos deg - riktig og trygt! Bruk en 
-    entreprenør godkjent av Varmepumpeforeningen. """)
+            costs.profitibality_operation_and_investment()
+    st.write("")
+    c1, c2 = st.columns(2)
+    with c1:
+        st.write(""" Sjekk hvilke entreprenører som kan montere varmepumpe 
+        og bore energibrønn hos deg - riktig og trygt! """)
+        st.write(""" Bruk en entreprenør godkjent av Varmepumpeforeningen. """)
 
     # Standard Base64 Encoding
     data = {}
@@ -123,14 +125,13 @@ if start_calculation or st.session_state.load_state:
     encodedStr = str(encodedBytes, "utf-8")
 
     address_str = input_obj.adr.split(",")[0].split(" ")
-
-    st.write("Vi råder deg også til å:")
-    st.write("- • Få entreprenør til å komme på befaring")
-    st.write("- • Vurdere både pris og kvalitet")
-    st.write("- • Skrive kontrakt før arbeidet starter")
-
+    with c2:
+        st.write("""Vi råder deg også til å: """)
+        st.write("• Få entreprenør til å komme på befaring")
+        st.write("• Vurdere både pris og kvalitet ")
+        st.write("• Skrive kontrakt før arbeidet starter")
     st.text("")
     #st.button("Sjekk her hvem som kan installere bergvarme i din bolig", on_click=open_page, args=(f"https://www.varmepumpeinfo.no/forhandler?postnr={input_obj.postcode}&adresse={address_str[0]}+{address_str[1]}&type=bergvarme&meta={encodedStr}",))
-    st.markdown(f'<a target="parent" style="background-color: #white;color:black;font-size:1.25rem;border: solid 1px #e5e7eb; border-radius: 15px; text-align: center;padding: 16px 24px;min-height: 60px;display: inline-block;box-sizing: border-box;width: 100%;" href="https://www.varmepumpeinfo.no/forhandler?postnr={input_obj.postcode}&adresse={address_str[0]}+{address_str[1]}&type=bergvarme&meta={encodedStr}">Sjekk her hvem som kan installere bergvarme i din bolig</a>', unsafe_allow_html=True)
+    st.markdown(f'<a target="parent" style="background-color: #white;color:black;font-size:2.0rem;border: solid 1px #e5e7eb; border-radius: 15px; text-align: center;padding: 16px 24px;min-height: 60px;display: inline-block;box-sizing: border-box;width: 100%;" href="https://www.varmepumpeinfo.no/forhandler?postnr={input_obj.postcode}&adresse={address_str[0]}+{address_str[1]}&type=bergvarme&meta={encodedStr}">Sett i gang - finn en seriøs entreprenør</a>', unsafe_allow_html=True)
 
 
