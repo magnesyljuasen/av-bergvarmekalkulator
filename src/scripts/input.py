@@ -43,8 +43,9 @@ class Input:
             self.postcode = selected_adr[3]
         else:
             #st_lottie("src/csv/house.json")
-            image = Image.open('src/data/figures/Ordinary day-amico.png')
-            #st.image(image)
+            #image = Image.open('src/data/figures/Ordinary day-amico.png')
+            image = Image.open("src/data/figures/bergvarmekalkulatoren_logo.png")
+            st.image(image)
             st.stop()
 
     def area_input(self):

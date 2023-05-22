@@ -95,6 +95,7 @@ div.stButton > button:first-child {
     border-radius: 15px;
     padding: 2.5% 2.5% 2.5% 2.5%;
     text-align: center;
+    min-height: 100px;
 } 
 
 
@@ -105,9 +106,27 @@ div.stButton > button:first-child {
     border: 1px groove #005173;
 }
 
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
+MainMenu {visibility: hidden;}
 header {visibility: hidden;}
+
+footer {visibility: hidden;}
+        
+footer:hover,  footer:active {
+    color: #ffffff;
+    background-color: transparent;
+    text-decoration: underline;
+    transition: 400ms ease 0s;
+}
+
+footer:after {
+    content:"En tjeneste levert av Asplan Viak og Norsk Varmepumpeforening (NOVAP)"; 
+    visibility: visible;
+    display: block;
+    position: relative;
+    padding: 5px;
+    top: 2px;
+    color: black;
+}
 
 
 
