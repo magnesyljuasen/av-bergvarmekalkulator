@@ -47,6 +47,7 @@ class Input:
             #image = Image.open('src/data/figures/Ordinary day-amico.png')
             image = Image.open("src/data/figures/EGEN_LOGO.png")
             st.image(image)
+            st.write("hei")
             st.stop()
 
     def area_input(self):
