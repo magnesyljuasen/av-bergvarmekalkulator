@@ -45,7 +45,7 @@ class Input:
         else:
             #st_lottie("src/csv/house.json")
             #image = Image.open('src/data/figures/Ordinary day-amico.png')
-            image = Image.open("src/data/figures/nylogo.png")
+            image = Image.open("nylogo.png")
             st.image(image)
             st.stop()
 
