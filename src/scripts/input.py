@@ -45,9 +45,8 @@ class Input:
         else:
             #st_lottie("src/csv/house.json")
             #image = Image.open('src/data/figures/Ordinary day-amico.png')
-            image = Image.open("src/data/figures/EGEN_LOGO.png")
+            image = Image.open("src/data/figures/nylogo.png")
             st.image(image)
-            st.write("hei")
             st.stop()
 
     def area_input(self):
