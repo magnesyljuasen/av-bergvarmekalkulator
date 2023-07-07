@@ -57,7 +57,7 @@ if start_calculation or st.session_state.load_state:
     #placeholder_1.empty()
     with st.sidebar:
         ## justere forutsetninger
-        image = Image.open("src/data/figures/bergvarmekalkulatoren_logo_blå.png")
+        image = Image.open("src\data\figures\bergvarmekalkulatoren_logo_blå.png")
         st.image(image)
         st.header("Forutsetninger")
         st.write("Her kan du justere forutsetningene som ligger til grunn for beregningene.")
