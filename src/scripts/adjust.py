@@ -100,7 +100,7 @@ class Adjust:
             'Vest-Norge (NO5)': 'NO5'
         }
         df = pd.read_excel("src/csv/spotpriser.xlsx", sheet_name=selected_year)
-        spotprice_arr = df[region_mapping[self.elregion]].to_numpy()
+        spotprice_arr = df[region_mapping[self.elregion]].to_numpy()/1.25
         return spotprice_arr
             
 

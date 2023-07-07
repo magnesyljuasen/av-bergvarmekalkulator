@@ -53,6 +53,7 @@ class Input:
         c1, c2 = st.columns(2)
         with c1:
             area = st.slider('1. Velg oppvarmet boligareal [m²]', min_value=100, max_value=500)
+            #area = st.text_input('1. Velg oppvarmet boligareal [m²]')
         with c2:
             st.info("Boligarealet som tilføres varme fra boligens varmesystem")
         minimum_area, maximum_area = 100, 500
