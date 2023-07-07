@@ -13,26 +13,27 @@ class Costs:
         self.interest = interest
 
     def calculate_investment (self, heat_pump_size, meter, depth_to_bedrock):
-        heat_pump_price = 141000
-        
+        #heat_pump_price = 141000
         if heat_pump_size > 12:
             heat_pump_price = int(heat_pump_price + (heat_pump_size - 12) * 12000)
+        heat_pump_price = 12000 * heat_pump_size
         
-        graving_pris = 30000
-        rigg_pris = 15000
-        etablering_pris = 3500
-        odex_sko_pris = 575
-        bunnlodd_pris = 1000
-        lokk_pris = 700
-        odex_i_losmasser_pris = 700  # per meter
-        fjellboring_pris = 170  # per meter
-        kollektor_pris = 90  # per meter
+        #graving_pris = 30000
+        #rigg_pris = 15000
+        #etablering_pris = 3500
+        #odex_sko_pris = 575
+        #bunnlodd_pris = 1000
+        #lokk_pris = 700
+        #odex_i_losmasser_pris = 700  # per meter
+        #fjellboring_pris = 170  # per meter
+        #kollektor_pris = 90  # per meter
 
-        kollektor = (meter - 1) * kollektor_pris
-        boring = ((meter - depth_to_bedrock) * fjellboring_pris) + (depth_to_bedrock * odex_i_losmasser_pris)
-        boring_faste_kostnader = etablering_pris + odex_sko_pris + bunnlodd_pris + lokk_pris + rigg_pris + graving_pris
+        #kollektor = (meter - 1) * kollektor_pris
+        #boring = ((meter - depth_to_bedrock) * fjellboring_pris) + (depth_to_bedrock * odex_i_losmasser_pris)
+        #boring_faste_kostnader = etablering_pris + odex_sko_pris + bunnlodd_pris + lokk_pris + rigg_pris + graving_pris
 
-        energibronn_pris = int(kollektor) + int(boring) + int(boring_faste_kostnader)
+        #energibronn_pris = int(kollektor) + int(boring) + int(boring_faste_kostnader)
+        energibronn_pris = meter * 600
         komplett_pris = energibronn_pris + heat_pump_price
         self.investment = int(komplett_pris)
 
@@ -225,7 +226,7 @@ class Costs:
         el_cost_hourly = self._elcost(energy_arr, elprice_arr)
         gshp_cost_hourly = self._elcost(compressor_arr + peak_arr, elprice_arr)
 
-        self.el_cost_monthly = np.array(hour_to_month(el_cost_hourly))
+        self.el_cost_monthly = np.array(hour_to_month(el_cost_hourly.flatten()))
         self.gshp_cost_monthly = np.array(hour_to_month(gshp_cost_hourly)) + instalment
 
         self.el_cost_sum = np.sum(self.el_cost_monthly)
@@ -292,9 +293,9 @@ class Costs:
         sammenlignet med elektrisk oppvarming. """)
         
     def operation_show_after(self):
-        investment = int(round(self.investment, -3))
-        operation_saving = int(round(self.savings_sum, -3))
-        total_saving = int(round(self.savings_sum*20 - self.investment,-3))
+        investment = int(round(self.investment, -1))
+        operation_saving = int(round(self.savings_sum, -1))
+        total_saving = int(round(self.savings_sum*20 - self.investment,-1))
         self.total_saving = total_saving
         c1, c2, c3 = st.columns(3)
         with c1:
@@ -311,9 +312,9 @@ class Costs:
             #st.metric(label="Samlet besparelse etter 20 år", value = f"{total_saving:,} kr".replace(',', ' '))
              
     def operation_and_investment_show(self):
-        investment = int(round(self.investment, -3))
-        savings1 = int(round(self.savings_sum, -3))
-        savings2 = int(round(self.savings_sum*20, -3))
+        investment = int(round(self.investment, -1))
+        savings1 = int(round(self.savings_sum, -1))
+        savings2 = int(round(self.savings_sum*20, -1))
         c1, c2, c3 = st.columns(3)
         with c1:
             svg = """ <svg width="26" height="35" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" overflow="hidden"><defs><clipPath id="clip0"><rect x="369" y="79" width="26" height="27"/></clipPath></defs><g clip-path="url(#clip0)" transform="translate(-369 -79)"><path d="M25.4011 12.9974C25.4011 19.8478 19.8478 25.4011 12.9974 25.4011 6.14699 25.4011 0.593654 19.8478 0.593654 12.9974 0.593654 6.14699 6.14699 0.593654 12.9974 0.593654 19.8478 0.593654 25.4011 6.14699 25.4011 12.9974Z" stroke="#005173" stroke-width="0.757136" stroke-miterlimit="10" fill="#fff" transform="matrix(1 0 0 1.03846 369 79)"/><path d="M16.7905 6.98727 11.8101 19.0075 11.6997 19.0075 9.20954 12.9974" stroke="#005173" stroke-width="0.757136" stroke-linejoin="round" fill="none" transform="matrix(1 0 0 1.03846 369 79)"/></g></svg>"""

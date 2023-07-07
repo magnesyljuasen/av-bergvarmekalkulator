@@ -95,7 +95,8 @@ class Geoenergy:
         
     def demand_calculation(self):
         self.energy_gshp_arr, self.energy_gshp_sum, self.cutoff = self.coverage_calculation()
-        self.heat_pump_size = max(self.energy_arr)
+        self.heat_pump_size = max(self.energy_gshp_arr)
+        #self.heat_pump_size = max(self.energy_arr)
         self.energy_gshp_delivered_arr, self.energy_gshp_compressor_arr, self.energy_gshp_peak_arr, \
         self.energy_gshp_delivered_sum, self.energy_gshp_compressor_sum, self.energy_gshp_peak_sum = self.cop_calculation()
 

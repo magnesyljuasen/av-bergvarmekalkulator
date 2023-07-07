@@ -12,14 +12,16 @@ st.set_page_config(
     layout="centered",
     initial_sidebar_state="expanded")
 
+def on_click_function():
+    st.session_state.is_expanded = False
+    
 with open("src/styles/main.css") as f:
     st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
   
-
 # adresse og boligareal
 if 'is_expanded' not in st.session_state:
-    st.session_state['is_expanded'] = True
-container = st.expander("Inndata", expanded=st.session_state['is_expanded'])
+    st.session_state.is_expanded = True
+container = st.expander("Inndata", expanded=st.session_state.is_expanded)
 with container:
     st.title("Bergvarmekalkulatoren")
     st.write(f"Med bergvarmekalkulatoren kan du raskt beregne potensialet for å hente energi fra bakken til din bolig! Start med å skrive inn adresse i søkefeltet under.")
@@ -44,11 +46,7 @@ with container:
     
     # justere energibehov
     input_obj.demand_input((demand_obj.dhw_arr + demand_obj.space_heating_arr))
-
-
-    start_calculation = st.button("Start kalkulator for min bolig")
-    st.session_state['is_expanded'] = False
-    #initialize session state
+    start_calculation = st.button("Start kalkulator for min bolig", on_click=on_click_function)
     if "load_state" not in st.session_state:
         st.session_state.load_state = False
 
@@ -89,7 +87,6 @@ if start_calculation or st.session_state.load_state:
     with st.container():
         st.write("**Lønnsomhet**")
         tab1, tab2 = st.tabs(["Direkte kjøp", "Lånefinansiert"])
-
         with tab1:
             costs.calculate_monthly_costs(energy_arr = energy_arr, compressor_arr = geoenergy_obj.energy_gshp_compressor_arr, peak_arr = geoenergy_obj.energy_gshp_peak_arr, elprice_arr = adjust_obj.elprice, investment = 0)
             costs.operation_show_after()

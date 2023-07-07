@@ -21,9 +21,9 @@ class Environment:
         self.gshp_co2_sum = np.sum(self.gshp_co2_monthly) * 20
         self.savings_co2_sum = (self.el_co2_sum - self.gshp_co2_sum)
 
-        self.gshp = int(round(np.sum(compressor_arr), -3))
-        self.el = int(round(np.sum(energy_arr) + np.sum(peak_arr), -3))
-        self.savings_power = int(round(self.el - self.gshp, -3))
+        self.gshp = int(round(np.sum(compressor_arr), -1))
+        self.el = int(round(np.sum(energy_arr) + np.sum(peak_arr), -1))
+        self.savings_power = int(round(self.el - self.gshp, -1))
     
     def plot(self):
         gshp = self.gshp
