@@ -105,29 +105,6 @@ if start_calculation or st.session_state.load_state:
                 costs.plot_elprice()
             costs.profitibality_operation_and_investment()
     st.write("")
-    c1, c2 = st.columns(2)
-    with c1:
-        st.write(""" Sjekk hvilke entreprenører som kan montere varmepumpe 
-        og bore energibrønn hos deg - riktig og trygt! """)
-        st.write(""" Bruk en entreprenør godkjent av Varmepumpeforeningen. """)
-
-    # Standard Base64 Encoding
-    data = {}
-    data['bronndybde'] = geoenergy_obj.meter
-    data['varmepumpe'] = geoenergy_obj.heat_pump_size
-    data['oppvarmingsbehov'] = int(adjust_obj.space_heating_sum + adjust_obj.dhw_sum)
-    data['boligareal'] = input_obj.area
-    json_data = json.dumps(data)      
-    encodedBytes = base64.b64encode(json_data.encode("utf-8"))
-    encodedStr = str(encodedBytes, "utf-8")
-
-    address_str = input_obj.adr.split(",")[0].split(" ")
-    with c2:
-        st.write("""Vi råder deg også til å: """)
-        st.write("• Få entreprenør til å komme på befaring")
-        st.write("• Vurdere både pris og kvalitet ")
-        st.write("• Skrive kontrakt før arbeidet starter")
-    st.text("")
     #st.button("Sjekk her hvem som kan installere bergvarme i din bolig", on_click=open_page, args=(f"https://www.varmepumpeinfo.no/forhandler?postnr={input_obj.postcode}&adresse={address_str[0]}+{address_str[1]}&type=bergvarme&meta={encodedStr}",))
     #st.markdown(f'<a target="parent" style="background-color: #white;text-decoration: underline;color:black;font-size:2.0rem;border: solid 1px #e5e7eb; border-radius: 15px; text-align: center;padding: 16px 24px;min-height: 60px;display: inline-block;box-sizing: border-box;width: 100%;" href="https://www.varmepumpeinfo.no/forhandler?postnr={input_obj.postcode}&adresse={address_str[0]}+{address_str[1]}&type=bergvarme&meta={encodedStr}">Sett i gang - finn en seriøs entreprenør</a>', unsafe_allow_html=True)
     st.markdown(f'<a target="parent" style="background-color: #white;text-decoration: underline;color:black;font-size:2.0rem;border: solid 1px #e5e7eb; border-radius: 15px; text-align: center;padding: 16px 24px;min-height: 60px;display: inline-block;box-sizing: border-box;width: 100%;" href = "mailto:magne.syljuasen@asplanviak.no?subject = Feedback&body = Message">Spør oss om bergvarme!</a>', unsafe_allow_html=True)
