@@ -57,7 +57,7 @@ if start_calculation or st.session_state.load_state:
     #placeholder_1.empty()
     with st.sidebar:
         ## justere forutsetninger
-        image = Image.open("src/data/figures/bergvarmekalkulatoren_logo_blå.png")
+        image = Image.open("src/data/figures/logo.png")
         st.image(image)
         st.header("Forutsetninger")
         st.write("Her kan du justere forutsetningene som ligger til grunn for beregningene.")
@@ -129,5 +129,6 @@ if start_calculation or st.session_state.load_state:
         st.write("• Skrive kontrakt før arbeidet starter")
     st.text("")
     #st.button("Sjekk her hvem som kan installere bergvarme i din bolig", on_click=open_page, args=(f"https://www.varmepumpeinfo.no/forhandler?postnr={input_obj.postcode}&adresse={address_str[0]}+{address_str[1]}&type=bergvarme&meta={encodedStr}",))
-    st.markdown(f'<a target="parent" style="background-color: #white;text-decoration: underline;color:black;font-size:2.0rem;border: solid 1px #e5e7eb; border-radius: 15px; text-align: center;padding: 16px 24px;min-height: 60px;display: inline-block;box-sizing: border-box;width: 100%;" href="https://www.varmepumpeinfo.no/forhandler?postnr={input_obj.postcode}&adresse={address_str[0]}+{address_str[1]}&type=bergvarme&meta={encodedStr}">Sett i gang - finn en seriøs entreprenør</a>', unsafe_allow_html=True)
+    #st.markdown(f'<a target="parent" style="background-color: #white;text-decoration: underline;color:black;font-size:2.0rem;border: solid 1px #e5e7eb; border-radius: 15px; text-align: center;padding: 16px 24px;min-height: 60px;display: inline-block;box-sizing: border-box;width: 100%;" href="https://www.varmepumpeinfo.no/forhandler?postnr={input_obj.postcode}&adresse={address_str[0]}+{address_str[1]}&type=bergvarme&meta={encodedStr}">Sett i gang - finn en seriøs entreprenør</a>', unsafe_allow_html=True)
+    st.markdown(f'<a target="parent" style="background-color: #white;text-decoration: underline;color:black;font-size:2.0rem;border: solid 1px #e5e7eb; border-radius: 15px; text-align: center;padding: 16px 24px;min-height: 60px;display: inline-block;box-sizing: border-box;width: 100%;" href = "mailto:magne.syljuasen@asplanviak.no?subject = Feedback&body = Message">Sett i gang - be om pris</a>', unsafe_allow_html=True)
 
